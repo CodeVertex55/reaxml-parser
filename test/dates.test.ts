@@ -75,11 +75,11 @@ describe("parseDate invalid input", () => {
     expect(diagnostics[0]?.message).toContain("garbage");
   });
 
-  it("truncates a long raw value to 40 characters", () => {
+  it("truncates a long raw value to the shared 80-character cap", () => {
     const long = "x".repeat(100);
     const { diagnostics } = run(long);
-    expect(diagnostics[0]?.message).toContain("x".repeat(40));
-    expect(diagnostics[0]?.message).not.toContain("x".repeat(41));
+    expect(diagnostics[0]?.message).toContain("x".repeat(80));
+    expect(diagnostics[0]?.message).not.toContain("x".repeat(81));
   });
 });
 

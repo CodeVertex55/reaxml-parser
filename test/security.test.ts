@@ -176,6 +176,18 @@ describe("diagnostic details", () => {
     expect(warning?.message).toContain("pend ing FAKE LOG LINE");
   });
 
+  it("never put a C1 control, a bidirectional control or a line separator in a message", () => {
+    const xml = feed(
+      residential("TEST0001", "", 'status="a&#x9b;31m&#x202e;b&#x2066;c&#x2028;d&#x85;e"'),
+    );
+    const warning = parseReaxml(xml).warnings[0];
+    expect(warning?.code).toBe("unknown-status");
+    expect(warning?.message).toContain("a 31m b c d e");
+    for (const codePoint of [0x9b, 0x202e, 0x2066, 0x2028, 0x85]) {
+      expect(warning?.message.includes(String.fromCodePoint(codePoint))).toBe(false);
+    }
+  });
+
   it("keeps a huge element name out of the message and shortens the path", () => {
     const name = "x".repeat(50_000);
     const warning = parseReaxml(feed(`<${name}/>`)).warnings[0];

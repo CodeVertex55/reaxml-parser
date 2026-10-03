@@ -1,4 +1,5 @@
 import type { Diagnostic, DiagnosticCode, Severity } from "./types.js";
+import { replaceUnsafe, truncateCodePoints } from "./unsafe-text.js";
 
 type CodeEntry = Readonly<{ severity: Severity; description: string }>;
 
@@ -101,21 +102,18 @@ export class ReaxmlError extends Error {
   }
 }
 
-/** Longest detail kept in a diagnostic message. */
+/** Longest detail kept in a diagnostic message, in code points. */
 const MAX_DETAIL = 80;
 
 /**
- * Makes a detail safe to log: control characters become spaces, runs of whitespace collapse,
- * the ends are trimmed and the result is cut to 80 characters. Details can come from the
- * document, so this stops a value from adding lines to a log or filling it.
+ * Makes a detail safe to log: control characters (C0, DEL, C1, and the line and paragraph
+ * separators) and bidirectional controls become spaces, runs of whitespace collapse, the ends
+ * are trimmed and the result is cut to 80 code points, so a surrogate pair is never split.
+ * Details can come from the document, so this stops a value from adding lines to a log,
+ * reordering what it shows, or filling it. Callers pass the raw value and rely on this cap.
  */
 function sanitiseDetail(detail: string): string {
-  let spaced = "";
-  for (const char of detail) {
-    const code = char.codePointAt(0) ?? 0;
-    spaced += code < 0x20 || code === 0x7f ? " " : char;
-  }
-  return spaced.replace(/\s+/g, " ").trim().slice(0, MAX_DETAIL);
+  return truncateCodePoints(replaceUnsafe(detail, " ").replace(/\s+/g, " ").trim(), MAX_DETAIL);
 }
 
 /** Internal accumulator for diagnostics. Not part of the public API. */

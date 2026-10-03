@@ -245,11 +245,11 @@ describe("parseInspections unparseable text", () => {
     expect(diagnostics[0]?.message).toContain(text);
   });
 
-  it("truncates the raw text in the diagnostic to 60 characters", () => {
+  it("truncates the raw text in the diagnostic to the shared 80-character cap", () => {
     const long = "x".repeat(90);
     const { diagnostics } = one(long);
-    expect(diagnostics[0]?.message).toContain("x".repeat(60));
-    expect(diagnostics[0]?.message).not.toContain("x".repeat(61));
+    expect(diagnostics[0]?.message).toContain("x".repeat(80));
+    expect(diagnostics[0]?.message).not.toContain("x".repeat(81));
   });
 
   it("omits the unparseable inspection and keeps the others in order", () => {

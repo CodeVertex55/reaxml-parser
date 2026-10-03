@@ -134,6 +134,34 @@ describe("Collector detail sanitising", () => {
     expect(messageFor("y".repeat(500))).toBe(`${prefix}${"y".repeat(80)}`);
   });
 
+  it("replaces C1 controls, bidirectional controls and line separators with spaces", () => {
+    const unsafe = [
+      0x80, 0x85, 0x9b, 0x9f, 0x200e, 0x200f, 0x202a, 0x202b, 0x202c, 0x202d, 0x202e, 0x2066,
+      0x2067, 0x2068, 0x2069, 0x2028, 0x2029,
+    ];
+    for (const codePoint of unsafe) {
+      const detail = `a${String.fromCodePoint(codePoint)}b`;
+      expect(messageFor(detail), codePoint.toString(16)).toBe(`${prefix}a b`);
+    }
+  });
+
+  it("keeps characters next to the unsafe ranges", () => {
+    const safe = [0xa1, 0xe9, 0x200d, 0x2010, 0x2027, 0x2030, 0x2065, 0x206a];
+    for (const codePoint of safe) {
+      const char = String.fromCodePoint(codePoint);
+      expect(messageFor(`a${char}b`), codePoint.toString(16)).toBe(`${prefix}a${char}b`);
+    }
+  });
+
+  it("truncates by code point and never splits a surrogate pair", () => {
+    const face = String.fromCodePoint(0x1f600);
+    const message = messageFor(`a${face.repeat(100)}`);
+    expect(message).toBe(`${prefix}a${face.repeat(79)}`);
+    const last = message.charCodeAt(message.length - 1);
+    expect(last >= 0xdc00 && last <= 0xdfff).toBe(true);
+    expect(() => encodeURIComponent(message)).not.toThrow();
+  });
+
   it("leaves out the separator when nothing is left of the detail", () => {
     expect(messageFor(" \n\t ")).toBe(DIAGNOSTIC_CODES["unknown-status"].description);
     expect(messageFor("")).toBe(DIAGNOSTIC_CODES["unknown-status"].description);

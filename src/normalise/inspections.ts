@@ -9,9 +9,6 @@ import {
   type DateTimeParts,
 } from "./dates.js";
 
-/** Longest raw value echoed into an unparseable-inspection diagnostic. */
-const MAX_DETAIL = 60;
-
 const MAX_YEAR = 9999;
 
 const MONTHS: ReadonlyMap<string, number> = new Map(
@@ -112,7 +109,8 @@ function toInspection(parsed: Parsed, raw: string, o: DateOptions): Inspection |
  * Times are local and are converted like every other date, so with `timeZone` they become UTC
  * with a trailing Z. `raw` is the trimmed original text. Empty elements are ignored silently.
  * Text that matches no form, or names a date or time that does not exist, adds
- * `unparseable-inspection` with the text cut to 60 characters, and the inspection is omitted.
+ * `unparseable-inspection`, and the inspection is omitted. The diagnostic carries the text
+ * after the shared detail sanitising, which caps it at 80 characters.
  *
  * @throws RangeError when `o.timeZone` is not a valid IANA zone name and an inspection is read.
  */
@@ -124,7 +122,7 @@ export function parseInspections(listing: XmlNode, c: Collector, o: DateOptions)
       if (raw === null) continue;
       const parsed = matchDayMonthYear(raw) ?? matchIso(raw);
       const inspection = parsed === null ? null : toInspection(parsed, raw, o);
-      if (inspection === null) c.add("unparseable-inspection", node.path, raw.slice(0, MAX_DETAIL));
+      if (inspection === null) c.add("unparseable-inspection", node.path, raw);
       else out.push(inspection);
     }
   }

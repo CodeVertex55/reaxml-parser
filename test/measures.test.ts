@@ -122,6 +122,12 @@ describe("parseMeasure problems", () => {
     },
   );
 
+  it("cuts a long unknown unit to the shared 80-character cap", () => {
+    const { diagnostics } = run(`<area unit="${"u".repeat(200)}">450</area>`);
+    expect(diagnostics[0]?.message).toContain("u".repeat(80));
+    expect(diagnostics[0]?.message).not.toContain("u".repeat(81));
+  });
+
   it("reports diagnostics at the node path", () => {
     const root = parseXml("<land><area unit='furlong'>1</area></land>");
     const c = new Collector({ tolerant: true });

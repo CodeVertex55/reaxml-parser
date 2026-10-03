@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { run, type Io } from "../src/cli.js";
 import { VERSION } from "../src/index.js";
 import { feed, fixture } from "./helpers.js";
@@ -306,6 +306,53 @@ describe("run: terminal safety", () => {
     const out = cli(["validate", "feed.xml", "--json"], { "feed.xml": hostile });
     expect(hasControlCharacter(out.stdout)).toBe(false);
     expect(JSON.parse(out.stdout)).toHaveProperty("warnings");
+  });
+});
+
+describe("run: unsafe characters in paths and messages", () => {
+  // Element names cannot hold these characters in a well-formed document, so the parser is
+  // replaced here to hand the command-line tool a diagnostic that carries them.
+  const C1 = String.fromCodePoint(0x9b);
+  const OVERRIDE = String.fromCodePoint(0x202e);
+
+  afterEach(() => {
+    vi.doUnmock("../src/parse.js");
+    vi.resetModules();
+  });
+
+  it("replaces U+009B and U+202E in the path, the message and the listing id", async () => {
+    vi.resetModules();
+    vi.doMock("../src/parse.js", () => ({
+      parseReaxml: () => ({
+        meta: { generatedAt: null, listingCount: 0, hadCredentials: false },
+        listings: [],
+        warnings: [
+          {
+            code: "unknown-status",
+            severity: "warning",
+            message: `Status attribute not in the enum: a${C1}31m${OVERRIDE}b`,
+            listingId: `XNWTEST:TEST${OVERRIDE}0001`,
+            path: `propertyList/residential/x${C1}y/${OVERRIDE}z`,
+          },
+        ],
+      }),
+    }));
+    const fresh = await import("../src/cli.js");
+    let stdout = "";
+    const code = fresh.run(["validate", "feed.xml"], {
+      stdout: (s) => {
+        stdout += s;
+      },
+      stderr: () => undefined,
+      readFile: () => "<propertyList/>",
+    });
+    expect(code).toBe(0);
+    expect(stdout).toContain("Listing XNWTEST:TEST?0001:");
+    expect(stdout).toContain(
+      "  warning unknown-status propertyList/residential/x?y/?z Status attribute not in the enum: a?31m?b",
+    );
+    expect(stdout).not.toContain(C1);
+    expect(stdout).not.toContain(OVERRIDE);
   });
 });
 

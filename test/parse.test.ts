@@ -212,6 +212,8 @@ describe("status", () => {
     expect(result.listings[0]?.status).toBe("current");
     expect(result.warnings).toHaveLength(1);
     expect(result.warnings[0]?.message.length).toBeLessThan(200);
+    expect(result.warnings[0]?.message).toContain("x".repeat(80));
+    expect(result.warnings[0]?.message).not.toContain("x".repeat(81));
   });
 });
 

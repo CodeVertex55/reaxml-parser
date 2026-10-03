@@ -19,9 +19,6 @@ const DATE_ONLY_PATTERNS: readonly RegExp[] = [
 
 const DAY_MS = 86_400_000;
 
-/** Longest raw value echoed into an invalid-date diagnostic. */
-const MAX_DETAIL = 40;
-
 const formatters = new Map<string, Intl.DateTimeFormat>();
 
 /** One cached formatter per zone. Throws RangeError for a zone name Intl does not know. */
@@ -148,7 +145,7 @@ export function formatLocalDateTime(parts: DateTimeParts, opts: DateOptions): st
 }
 
 function invalid(raw: string, path: string, c: Collector): null {
-  c.add("invalid-date", path, raw.slice(0, MAX_DETAIL));
+  c.add("invalid-date", path, raw);
   return null;
 }
 

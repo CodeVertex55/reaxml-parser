@@ -42,15 +42,12 @@ const STATUSES: ReadonlySet<string> = new Set<ListingStatus>([
   "deleted",
 ]);
 
-/** Longest status value echoed into an unknown-status diagnostic. */
-const MAX_STATUS_DETAIL = 40;
-
 function statusOf(node: XmlNode, c: Collector): ListingStatus {
   const raw = attr(node, "status");
   if (raw === null) return "current";
   const status = raw.toLowerCase();
   if (STATUSES.has(status)) return status as ListingStatus;
-  c.add("unknown-status", node.path, raw.slice(0, MAX_STATUS_DETAIL));
+  c.add("unknown-status", node.path, raw);
   return "current";
 }
 

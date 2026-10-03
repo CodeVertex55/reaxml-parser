@@ -28,9 +28,6 @@ const UNITS: ReadonlyMap<string, Unit> = new Map<string, Unit>([
 /** Elements measured in meters when the unit attribute is missing. Others default to area. */
 const LINEAR_ELEMENTS: ReadonlySet<string> = new Set(["frontage", "depth"]);
 
-/** Longest unit text echoed into a diagnostic. */
-const MAX_UNIT_DETAIL = 40;
-
 /**
  * Reads a measure element such as `area`, `frontage` or `depth`. A missing node gives null with
  * no diagnostic. Empty text gives `empty-measure`, non-numeric text gives `unparseable-number`
@@ -60,7 +57,7 @@ export function parseMeasure(node: XmlNode | undefined, c: Collector): Measure |
 
   const unit = UNITS.get(rawUnit.toLowerCase());
   if (unit === undefined) {
-    c.add("unknown-unit", node.path, rawUnit.slice(0, MAX_UNIT_DETAIL));
+    c.add("unknown-unit", node.path, rawUnit);
     return null;
   }
   return { value, unit };

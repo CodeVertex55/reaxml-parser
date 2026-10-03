@@ -3,6 +3,7 @@ import { pathToFileURL } from "node:url";
 import { VERSION, parseReaxml, summarise } from "./index.js";
 import type { Summary } from "./index.js";
 import type { Diagnostic, ParseResult } from "./types.js";
+import { replaceUnsafe } from "./unsafe-text.js";
 
 /** Everything the command-line tool does to the outside world, so tests can fake it. */
 export type Io = {
@@ -95,14 +96,13 @@ function countBlock(title: string, counts: Readonly<Record<string, number | unde
   return [`${title}:`, ...entries.map(([key, count]) => `  ${key}: ${count}`)];
 }
 
-/** Replaces control characters with `?`, so text from the feed cannot drive the terminal. */
+/**
+ * Replaces control characters (C0, DEL, C1, and the line and paragraph separators) and
+ * bidirectional controls with `?`, so text from the feed cannot drive the terminal, add lines
+ * or reorder what is shown.
+ */
 function plain(text: string): string {
-  let out = "";
-  for (const char of text) {
-    const code = char.codePointAt(0) ?? 0;
-    out += code < 0x20 || code === 0x7f ? "?" : char;
-  }
-  return out;
+  return replaceUnsafe(text, "?");
 }
 
 function diagnosticLine(d: Diagnostic): string {
