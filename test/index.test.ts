@@ -8,11 +8,13 @@ describe("public export surface", () => {
       "ReaxmlError",
       "VERSION",
       "parseReaxml",
+      "summarise",
     ]);
   });
 
   it("exports working values", () => {
     expect(typeof api.parseReaxml).toBe("function");
+    expect(typeof api.summarise).toBe("function");
     expect(typeof api.VERSION).toBe("string");
     expect(api.DIAGNOSTIC_CODES["xml-malformed"].severity).toBe("error");
     expect(new api.ReaxmlError("empty-document", null, "x", "m")).toBeInstanceOf(Error);

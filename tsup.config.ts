@@ -10,4 +10,11 @@ export default defineConfig([
     sourcemap: true,
     target: "es2022",
   },
+  {
+    entry: { cli: "src/cli.ts" },
+    format: ["esm"],
+    banner: { js: "#!/usr/bin/env node" },
+    clean: false,
+    target: "node20",
+  },
 ]);
