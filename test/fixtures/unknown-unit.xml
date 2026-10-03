@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <land status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0001</uniqueID>
+    <address display="yes">
+      <lotNumber>7</lotNumber>
+      <street>Example Street</street>
+      <suburb display="yes">Testville</suburb>
+      <state>WA</state>
+      <postcode>0009</postcode>
+    </address>
+    <headline>Block measured in a unit the parser does not know</headline>
+    <landDetails>
+      <area unit="furlong">450</area>
+      <frontage unit="metre">15</frontage>
+    </landDetails>
+  </land>
+</propertyList>

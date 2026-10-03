@@ -39,11 +39,15 @@ function positionOf(error: XmlParseError): string {
  * By default nothing is thrown for problems in the document: they come back in `warnings`.
  * With `tolerant: false` the first error-severity diagnostic throws a `ReaxmlError`.
  *
+ * @throws TypeError when `xml` is not a string, before anything else and whatever `tolerant` is
+ * set to.
  * @throws RangeError when `options.timeZone` is not a valid IANA zone name, whatever `tolerant`
  * is set to.
  * @throws ReaxmlError when `options.tolerant` is false and an error-severity diagnostic occurs.
  */
 export function parseReaxml(xml: string, options: ParseOptions = {}): ParseResult {
+  // Callers in plain JavaScript can pass a Buffer or null. Decoding is theirs to choose.
+  if (typeof xml !== "string") throw new TypeError("xml must be a string");
   const { timeZone } = options;
   if (timeZone !== undefined) assertTimeZone(timeZone);
 

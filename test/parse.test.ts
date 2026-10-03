@@ -151,6 +151,24 @@ describe("listing fields", () => {
     });
   });
 
+  it("reports an invalid availableAt at the path of the dateAvailable element", () => {
+    const result = parseReaxml(
+      feed(
+        "<rental><agentID>A</agentID><uniqueID>1</uniqueID><dateAvailable>0000-00-00</dateAvailable></rental>",
+      ),
+    );
+    const listing = result.listings[0];
+    expect(listing?.kind === "rental" ? listing.availableAt : undefined).toBeNull();
+    expect(shapes(result.warnings)).toEqual([
+      {
+        code: "invalid-date",
+        severity: "warning",
+        listingId: "A:1",
+        path: "propertyList/rental/dateAvailable",
+      },
+    ]);
+  });
+
   it("reads an energy rating that is not a number as null with a diagnostic", () => {
     const result = parseReaxml(
       feed(
@@ -342,6 +360,30 @@ describe("meta", () => {
     expect(shapes(result.warnings)).toEqual([
       { code: "empty-document", severity: "error", listingId: null, path: "PropertyList" },
     ]);
+  });
+});
+
+describe("input type", () => {
+  const notStrings: readonly [string, unknown][] = [
+    ["a Uint8Array", new TextEncoder().encode(feed(residential("TEST0001")))],
+    ["null", null],
+    ["undefined", undefined],
+  ];
+
+  it.each(notStrings)("throws a TypeError for %s in tolerant mode", (_name, value) => {
+    expect(() => parseReaxml(value as string)).toThrow(new TypeError("xml must be a string"));
+  });
+
+  it.each(notStrings)("throws a TypeError for %s when not tolerant", (_name, value) => {
+    expect(() => parseReaxml(value as string, { tolerant: false })).toThrow(
+      new TypeError("xml must be a string"),
+    );
+  });
+
+  it("checks the input before the time zone", () => {
+    expect(() => parseReaxml(null as unknown as string, { timeZone: "Not/AZone" })).toThrow(
+      TypeError,
+    );
   });
 });
 

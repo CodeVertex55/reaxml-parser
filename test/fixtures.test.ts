@@ -774,6 +774,57 @@ describe("diagnostic fixtures", () => {
     expect(address?.streetLine).toBe("2/80 Example Street");
   });
 
+  it("unknown-unit.xml leaves the measure with the unknown unit null", () => {
+    const result = parseReaxml(fixture("unknown-unit"));
+    expect(shapes(result.warnings)).toEqual([
+      {
+        code: "unknown-unit",
+        severity: "warning",
+        listingId: "XNWTEST:TEST0001",
+        path: "propertyList/land/landDetails/area",
+      },
+    ]);
+    expect(result.warnings[0]?.message).toContain("furlong");
+    expect(result.listings[0]?.land).toEqual({
+      area: null,
+      frontage: { value: 15, unit: "meter" },
+      depth: null,
+    });
+  });
+
+  it("address-hidden.xml flags the address and still returns its fields and location", () => {
+    const result = parseReaxml(fixture("address-hidden"));
+    expect(shapes(result.warnings)).toEqual([
+      {
+        code: "address-hidden",
+        severity: "info",
+        listingId: "XNWTEST:TEST0001",
+        path: "propertyList/residential/address",
+      },
+      {
+        code: "extension-fields-present",
+        severity: "info",
+        listingId: "XNWTEST:TEST0001",
+        path: "propertyList/residential/extraFields",
+      },
+    ]);
+    const listing = result.listings[0];
+    expect(listing?.address).toEqual({
+      display: false,
+      subNumber: null,
+      lotNumber: null,
+      streetNumber: "9",
+      street: "Example Street",
+      streetLine: "9 Example Street",
+      suburb: "Testville",
+      suburbDisplay: true,
+      state: "WA",
+      postcode: "0000",
+      country: null,
+    });
+    expect(listing?.location).toEqual({ lat: -30.5, lng: 140.5 });
+  });
+
   it("extension-fields.xml collects fields and derives the location", () => {
     const result = parseReaxml(fixture("extension-fields"));
     expect(shapes(result.warnings)).toEqual([

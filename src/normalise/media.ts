@@ -25,7 +25,8 @@ export function isWebUrl(value: string): boolean {
  * document order with no sorting. An element is kept only when its `url` is an http or https
  * address. With no `url` and no `file` it is an empty placeholder and adds
  * `empty-media-placeholder`; with a `file` only, or with any other kind of url, it adds
- * `media-without-url`. The url itself is never echoed into a diagnostic. `id` is kept verbatim,
+ * `media-without-url`, with the detail `url is not http or https` for the second case. The url
+ * itself is never echoed into a diagnostic. `id` is kept verbatim,
  * and an invalid `modTime` adds `invalid-date` while the item is still kept.
  */
 export function parseMedia(
@@ -50,7 +51,8 @@ export function parseMedia(
         continue;
       }
       if (!isWebUrl(url)) {
-        c.add("media-without-url", node.path);
+        // A fixed detail only: the url itself could be a script or a private address.
+        c.add("media-without-url", node.path, "url is not http or https");
         continue;
       }
 

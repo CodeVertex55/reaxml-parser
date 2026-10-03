@@ -118,6 +118,12 @@ export function normaliseListing(node: XmlNode, c: Collector, o: ResolvedOptions
   }
 }
 
+/** The rental's `dateAvailable`, with any `invalid-date` reported at that element's path. */
+function availableAtOf(node: XmlNode, c: Collector, dates: DateOptions): string | null {
+  const element = child(node, "dateAvailable");
+  return element === undefined ? null : parseDate(text(element), element.path, c, dates);
+}
+
 function assemble(
   node: XmlNode,
   kind: ListingKind,
@@ -183,7 +189,7 @@ function assemble(
         category: category ?? null,
         rent: parseRent(node, c, money),
         bond: numberField(child(node, "bond"), c),
-        availableAt: parseDate(text(child(node, "dateAvailable")), node.path, c, dates),
+        availableAt: availableAtOf(node, c, dates),
       };
     case "commercial":
     case "commercialLand": {

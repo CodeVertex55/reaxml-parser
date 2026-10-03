@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <residential status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0001</uniqueID>
+    <address display="no">
+      <streetNumber>9</streetNumber>
+      <street>Example Street</street>
+      <suburb display="yes">Testville</suburb>
+      <state>WA</state>
+      <postcode>0000</postcode>
+    </address>
+    <headline>Listing whose street address must not be shown</headline>
+    <extraFields>
+      <geoLat>-30.5</geoLat>
+      <geoLong>140.5</geoLong>
+    </extraFields>
+  </residential>
+</propertyList>

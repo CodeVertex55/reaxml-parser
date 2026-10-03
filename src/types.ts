@@ -1,7 +1,7 @@
 export type ParseOptions = {
   /** IANA zone, e.g. "Australia/Perth". When set, dates are returned as UTC ISO strings with Z. */
   timeZone?: string;
-  /** Default false. When true, prices marked display="no" are included with `hidden: true`. */
+  /** Default false. When true, hidden amounts are included with `hidden: true`. */
   includeHiddenPrices?: boolean;
   /** Default true. When false, the first error-severity diagnostic throws ReaxmlError. */
   tolerant?: boolean;
@@ -70,16 +70,30 @@ export type ListingBase = {
   extra: Record<string, string>;
 };
 
-export type Listing =
-  | (ListingBase & { kind: "residential" | "land" | "rural" | "holidayRental" })
-  | (ListingBase & {
-      kind: "rental";
-      rent: Rent | null;
-      bond: number | null;
-      availableAt: string | null;
-    })
-  | (ListingBase & { kind: "commercial" | "commercialLand"; commercial: CommercialDetails })
-  | (ListingBase & { kind: "business"; business: BusinessDetails });
+/** Residential, land, rural and holiday rental listings, which add nothing to the base fields. */
+export type ResidentialListing = ListingBase & {
+  kind: "residential" | "land" | "rural" | "holidayRental";
+};
+
+/** A rental listing, with its rent, bond and availability date. */
+export type RentalListing = ListingBase & {
+  kind: "rental";
+  rent: Rent | null;
+  bond: number | null;
+  availableAt: string | null;
+};
+
+/** A commercial or commercial land listing, with its commercial detail. */
+export type CommercialListing = ListingBase & {
+  kind: "commercial" | "commercialLand";
+  commercial: CommercialDetails;
+};
+
+/** A business for sale, with its business detail. */
+export type BusinessListing = ListingBase & { kind: "business"; business: BusinessDetails };
+
+/** Any listing. Checking `kind` narrows it to one of the named variants. */
+export type Listing = ResidentialListing | RentalListing | CommercialListing | BusinessListing;
 
 export type Address = {
   /** address@display; false means do not show the street address publicly */
@@ -101,7 +115,7 @@ export type Address = {
 export type Price = {
   /** null when hidden and includeHiddenPrices is false, or when unparseable */
   amount: number | null;
-  /** price@display="no" */
+  /** True when price@display is present and not yes, true, 1 or range. */
   hidden: boolean;
   /** priceView text the agent wants shown, e.g. "Offers over $500,000". */
   view: string | null;
@@ -123,7 +137,7 @@ export type Measure = {
 };
 
 export type Features = {
-  /** "studio" maps to 0 with a warning-free note in docs */
+  /** `studio` maps to 0 */
   bedrooms: number | null;
   bathrooms: number | null;
   ensuites: number | null;

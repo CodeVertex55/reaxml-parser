@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Collector } from "../src/diagnostics.js";
+import { Collector, DIAGNOSTIC_CODES } from "../src/diagnostics.js";
 import { parseMedia } from "../src/normalise/media.js";
 import { parseXml } from "../src/xml.js";
 
@@ -212,6 +212,19 @@ describe("parseMedia placeholders and unusable urls", () => {
   it("does not echo the url in the diagnostic message", () => {
     const { diagnostics } = run('<objects><img id="1" url="javascript:alert(1)"/></objects>');
     expect(diagnostics[0]?.message).not.toContain("alert");
+  });
+
+  it("gives a url that is not http or https a fixed detail, and a file-only element none", () => {
+    const description = DIAGNOSTIC_CODES["media-without-url"].description;
+    const { diagnostics } = run(
+      '<objects><img id="1" url="file:///private/SECRET.jpg"/><img id="2" file="front.jpg"/></objects>',
+    );
+    expect(diagnostics.map((d) => d.message)).toEqual([
+      `${description}: url is not http or https`,
+      description,
+    ]);
+    expect(diagnostics[0]?.message).not.toContain("SECRET");
+    expect(diagnostics[0]?.message).not.toContain("file:");
   });
 });
 

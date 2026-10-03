@@ -42,7 +42,7 @@ const CODES = {
   },
   "media-without-url": {
     severity: "warning",
-    description: "Media with a file attribute only was skipped",
+    description: "Media with no usable http or https url was skipped",
   },
   "hidden-price-withheld": {
     severity: "info",

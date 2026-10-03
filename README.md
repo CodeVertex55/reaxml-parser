@@ -270,7 +270,7 @@ By code:
 
 Listing XNWTEST:TEST0001:
   info empty-media-placeholder propertyList/residential/objects/img[2] Media element with no url and no file was skipped
-  warning media-without-url propertyList/residential/objects/img[3] Media with a file attribute only was skipped
+  warning media-without-url propertyList/residential/objects/img[3] Media with no usable http or https url was skipped
   info empty-media-placeholder propertyList/residential/objects/floorplan Media element with no url and no file was skipped
 ```
 
