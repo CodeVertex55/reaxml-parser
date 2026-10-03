@@ -2,10 +2,19 @@ import type { Collector } from "../diagnostics.js";
 import { text, type XmlNode } from "../xml.js";
 
 /**
- * Optional minus, optional dollar sign, then digits with optional decimals. Commas are allowed
- * only as thousands grouping: one to three digits, then groups of exactly three.
+ * Optional minus, then an optional dollar sign with optional spaces after it, then digits with
+ * optional decimals. Digits may be grouped in thousands: one to three digits, then groups of
+ * exactly three, all separated by the same character (a comma, a space or a no-break space).
+ *
+ * The pattern runs in linear time. No two unbounded runs can match the same characters: the
+ * spaces after the dollar sign must be followed by a digit or a point, each grouping separator
+ * must be followed by exactly three digits, and every alternative starts with a digit.
  */
-const NUMBER_PATTERN = /^(-?)\s*\$?\s*((?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d*)?|\.\d+)$/;
+const NUMBER_PATTERN =
+  /^(-?)(?:\$\s*)?((?:\d{1,3}(?:,\d{3})+|\d{1,3}(?: \d{3})+|\d{1,3}(?:\u00a0\d{3})+|\d+)(?:\.\d*)?|\.\d+)$/;
+
+/** The separators that NUMBER_PATTERN accepts between thousands groups. */
+const GROUP_SEPARATORS = /[, \u00a0]/g;
 
 /** True for "yes", "true" and "1" in any case. Everything else, including null, is false. */
 export function yesNo(value: string | null): boolean {
@@ -15,16 +24,18 @@ export function yesNo(value: string | null): boolean {
 }
 
 /**
- * Parses a plain number. A leading minus, a leading dollar sign, thousands commas, decimals
- * and surrounding spaces are accepted. Commas must be valid thousands grouping, so "1,250" is
- * accepted and "12,34" is not. Negative zero becomes 0. Anything else, including a leading
- * plus sign and empty input, gives null.
+ * Parses a plain number. A leading minus, a leading dollar sign (optionally followed by spaces),
+ * thousands grouping, decimals and surrounding spaces are accepted. Grouping must be valid
+ * thousands grouping with one separator throughout, which may be a comma, a space or a no-break
+ * space: "1,250", "650 000" and "1 250 000.50" are accepted, while "12,34", "1,2,3", "1 23" and
+ * "1,250 000" are not. Negative zero becomes 0. Anything else, including a leading plus sign,
+ * a space between the minus and the number, and empty input, gives null.
  */
 export function parseNumber(value: string | null): number | null {
   if (value === null) return null;
   const match = NUMBER_PATTERN.exec(value.trim());
   if (match === null) return null;
-  const parsed = Number(`${match[1] ?? ""}${(match[2] ?? "").replaceAll(",", "")}`);
+  const parsed = Number(`${match[1] ?? ""}${(match[2] ?? "").replace(GROUP_SEPARATORS, "")}`);
   if (!Number.isFinite(parsed)) return null;
   return parsed === 0 ? 0 : parsed;
 }

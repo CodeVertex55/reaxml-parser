@@ -79,6 +79,51 @@ describe("parseNumber", () => {
   });
 });
 
+describe("parseNumber thousands grouping", () => {
+  it.each([
+    ["650,000", 650000],
+    ["650 000", 650000],
+    ["650\u00a0000", 650000],
+    ["1 250 000.50", 1250000.5],
+    ["1\u00a0250\u00a0000", 1250000],
+    ["$650 000", 650000],
+    ["$ 1 250 000", 1250000],
+    ["-1 250", -1250],
+    ["-$1,250", -1250],
+    ["650000", 650000],
+    ["1250000.50", 1250000.5],
+  ])("accepts %j as %j", (input, expected) => {
+    expect(parseNumber(input)).toBe(expected);
+  });
+
+  it.each([
+    ["12,34"],
+    ["1,2,3"],
+    ["1 23"],
+    ["1 2 3"],
+    ["1  250"],
+    ["1,250 000"],
+    ["1 250,000"],
+    ["1\u00a0250 000"],
+    ["1,250\u00a0000"],
+    ["1 2345"],
+    [" 1 250 x"],
+    ["- 5"],
+    ["$-5"],
+  ])("rejects %j", (input) => {
+    expect(parseNumber(input)).toBeNull();
+  });
+});
+
+describe("parseNumber running time", () => {
+  it("rejects a minus, 200,000 spaces and a letter in under 100 ms", () => {
+    const hostile = `-${" ".repeat(200_000)}x`;
+    const started = performance.now();
+    expect(parseNumber(hostile)).toBeNull();
+    expect(performance.now() - started).toBeLessThan(100);
+  });
+});
+
 describe("numberField", () => {
   it.each([
     ["<price>$1,250,000</price>", 1250000, []],
