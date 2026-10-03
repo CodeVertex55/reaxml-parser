@@ -56,7 +56,8 @@ function daysInMonth(year: number, month: number): number {
   return month === 4 || month === 6 || month === 9 || month === 11 ? 30 : 31;
 }
 
-type Fields = {
+/** The numeric fields of a local (wall clock) date-time. */
+export type DateTimeParts = {
   year: number;
   month: number;
   day: number;
@@ -64,6 +65,8 @@ type Fields = {
   minute: number;
   second: number;
 };
+
+type Fields = DateTimeParts;
 
 /** Milliseconds since the epoch of these fields read as UTC. Safe for years below 100. */
 function utcMs(f: Fields): number {
@@ -116,6 +119,34 @@ function toUtcString(instant: number): string {
   );
 }
 
+/** Whether the fields are a real calendar date and a real time of day (no leap seconds). */
+export function isValidDateTime(f: DateTimeParts): boolean {
+  return (
+    f.year >= 1 &&
+    f.month >= 1 &&
+    f.month <= 12 &&
+    f.day >= 1 &&
+    f.day <= daysInMonth(f.year, f.month) &&
+    f.hour <= 23 &&
+    f.minute <= 59 &&
+    f.second <= 59
+  );
+}
+
+/**
+ * Formats valid local date-time fields the way `parseDate` does: local `YYYY-MM-DDThh:mm:ss`,
+ * or UTC `YYYY-MM-DDThh:mm:ssZ` when `opts.timeZone` is set, with the same rules for wall times
+ * that happen twice or never. The fields are not validated; use `isValidDateTime` first.
+ *
+ * @throws RangeError when `opts.timeZone` is not a valid IANA zone name.
+ */
+export function formatLocalDateTime(parts: DateTimeParts, opts: DateOptions): string {
+  const formatter = opts.timeZone === undefined ? null : formatterFor(opts.timeZone);
+  if (formatter !== null) return toUtcString(zonedToUtc(formatter, parts));
+  const datePart = `${pad(parts.year, 4)}-${pad(parts.month, 2)}-${pad(parts.day, 2)}`;
+  return `${datePart}T${pad(parts.hour, 2)}:${pad(parts.minute, 2)}:${pad(parts.second, 2)}`;
+}
+
 function invalid(raw: string, path: string, c: Collector): null {
   c.add("invalid-date", path, raw.slice(0, MAX_DETAIL));
   return null;
@@ -139,7 +170,8 @@ export function parseDate(
   c: Collector,
   opts: DateOptions,
 ): string | null {
-  const formatter = opts.timeZone === undefined ? null : formatterFor(opts.timeZone);
+  // Resolve the zone first so that an unknown name throws on every call, even for empty input.
+  if (opts.timeZone !== undefined) formatterFor(opts.timeZone);
 
   const raw = value?.trim() ?? "";
   if (raw === "") return null;
@@ -169,20 +201,8 @@ export function parseDate(
     second: hasTime ? number(6) : 0,
   };
 
-  const ok =
-    fields.year >= 1 &&
-    fields.month >= 1 &&
-    fields.month <= 12 &&
-    fields.day >= 1 &&
-    fields.day <= daysInMonth(fields.year, fields.month) &&
-    fields.hour <= 23 &&
-    fields.minute <= 59 &&
-    fields.second <= 59;
-  if (!ok) return invalid(raw, path, c);
+  if (!isValidDateTime(fields)) return invalid(raw, path, c);
 
-  const datePart = `${pad(fields.year, 4)}-${pad(fields.month, 2)}-${pad(fields.day, 2)}`;
-  if (!hasTime) return datePart;
-
-  if (formatter !== null) return toUtcString(zonedToUtc(formatter, fields));
-  return `${datePart}T${pad(fields.hour, 2)}:${pad(fields.minute, 2)}:${pad(fields.second, 2)}`;
+  if (!hasTime) return `${pad(fields.year, 4)}-${pad(fields.month, 2)}-${pad(fields.day, 2)}`;
+  return formatLocalDateTime(fields, opts);
 }

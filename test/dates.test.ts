@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Collector } from "../src/diagnostics.js";
-import { parseDate } from "../src/normalise/dates.js";
+import { formatLocalDateTime, isValidDateTime, parseDate } from "../src/normalise/dates.js";
 
 function run(value: string | null, timeZone?: string) {
   const c = new Collector({ tolerant: true });
@@ -163,5 +163,51 @@ describe("parseDate with a time zone", () => {
   it("throws RangeError for an invalid zone even when the input is date-only or empty", () => {
     expect(() => run("2026-01-14", "Not/AZone")).toThrow(RangeError);
     expect(() => run(null, "Not/AZone")).toThrow(RangeError);
+  });
+});
+
+describe("formatLocalDateTime", () => {
+  const parts = { year: 2026, month: 1, day: 14, hour: 12, minute: 30, second: 0 };
+
+  it("formats a local date-time with no zone", () => {
+    expect(formatLocalDateTime(parts, {})).toBe("2026-01-14T12:30:00");
+  });
+
+  it("pads small values", () => {
+    const small = { year: 987, month: 2, day: 3, hour: 4, minute: 5, second: 6 };
+    expect(formatLocalDateTime(small, {})).toBe("0987-02-03T04:05:06");
+  });
+
+  it("converts to UTC with a zone, using the same rules as parseDate", () => {
+    const sydney = { timeZone: "Australia/Sydney" };
+    expect(formatLocalDateTime(parts, sydney)).toBe("2026-01-14T01:30:00Z");
+    const gap = { ...parts, month: 10, day: 4, hour: 2, minute: 30 };
+    expect(formatLocalDateTime(gap, sydney)).toBe("2026-10-03T16:30:00Z");
+  });
+
+  it("throws RangeError for an invalid zone", () => {
+    expect(() => formatLocalDateTime(parts, { timeZone: "Not/AZone" })).toThrow(RangeError);
+  });
+});
+
+describe("isValidDateTime", () => {
+  const ok = { year: 2026, month: 2, day: 28, hour: 23, minute: 59, second: 59 };
+
+  it("accepts a real date-time", () => {
+    expect(isValidDateTime(ok)).toBe(true);
+    expect(isValidDateTime({ ...ok, year: 2028, day: 29 })).toBe(true);
+  });
+
+  it.each([
+    { day: 29 },
+    { day: 0 },
+    { month: 13 },
+    { month: 0 },
+    { year: 0 },
+    { hour: 24 },
+    { minute: 60 },
+    { second: 60 },
+  ])("rejects %j", (change) => {
+    expect(isValidDateTime({ ...ok, ...change })).toBe(false);
   });
 });
