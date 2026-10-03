@@ -1,5 +1,7 @@
 import type { Diagnostic, DiagnosticCode, Severity } from "./types.js";
 
+type CodeEntry = Readonly<{ severity: Severity; description: string }>;
+
 const CODES = {
   "credentials-in-feed": {
     severity: "warning",
@@ -77,12 +79,12 @@ const CODES = {
     severity: "warning",
     description: "Inspection time string does not match a known pattern",
   },
-} as const satisfies Record<DiagnosticCode, { severity: Severity; description: string }>;
+} as const satisfies Record<DiagnosticCode, CodeEntry>;
+
+for (const entry of Object.values(CODES)) Object.freeze(entry);
 
 /** Every diagnostic code with its severity and a short description. */
-export const DIAGNOSTIC_CODES: Readonly<
-  Record<DiagnosticCode, { severity: Severity; description: string }>
-> = Object.freeze(CODES);
+export const DIAGNOSTIC_CODES: Readonly<Record<DiagnosticCode, CodeEntry>> = Object.freeze(CODES);
 
 /** Thrown in place of returning an error-severity diagnostic when `tolerant` is false. */
 export class ReaxmlError extends Error {

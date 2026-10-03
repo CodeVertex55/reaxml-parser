@@ -36,6 +36,13 @@ describe("DIAGNOSTIC_CODES", () => {
     }
     expect(Object.isFrozen(DIAGNOSTIC_CODES)).toBe(true);
   });
+
+  it("freezes every entry so a severity cannot be changed at runtime", () => {
+    expect(Object.isFrozen(DIAGNOSTIC_CODES["xml-malformed"])).toBe(true);
+    for (const entry of Object.values(DIAGNOSTIC_CODES)) {
+      expect(Object.isFrozen(entry)).toBe(true);
+    }
+  });
 });
 
 describe("Collector", () => {
