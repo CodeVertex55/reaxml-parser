@@ -580,7 +580,7 @@ describe("diagnostic fixtures", () => {
         path: "propertyList/agencyNotice",
       },
     ]);
-    expect(result.warnings[0]?.message).toContain("agencyNotice");
+    expect(result.warnings[0]?.message).not.toContain("agencyNotice");
     expect(result.listings.map((l) => l.id)).toEqual(["XNWTEST:TEST0001"]);
   });
 

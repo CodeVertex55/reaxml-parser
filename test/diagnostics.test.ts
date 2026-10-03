@@ -113,3 +113,34 @@ describe("Collector", () => {
     expect(collector.all.map((d) => d.severity)).toEqual(["warning", "info"]);
   });
 });
+
+describe("Collector detail sanitising", () => {
+  const messageFor = (detail: string): string => {
+    const collector = new Collector({ tolerant: true });
+    collector.add("unknown-status", "p", detail);
+    return collector.all[0]?.message ?? "";
+  };
+  const prefix = `${DIAGNOSTIC_CODES["unknown-status"].description}: `;
+
+  it("replaces control characters with spaces and collapses whitespace", () => {
+    expect(messageFor("a\nb\r\nc\td\u0000e\u007ff   g")).toBe(`${prefix}a b c d e f g`);
+  });
+
+  it("trims the detail", () => {
+    expect(messageFor("  \n padded \t ")).toBe(`${prefix}padded`);
+  });
+
+  it("truncates to 80 characters", () => {
+    expect(messageFor("y".repeat(500))).toBe(`${prefix}${"y".repeat(80)}`);
+  });
+
+  it("leaves out the separator when nothing is left of the detail", () => {
+    expect(messageFor(" \n\t ")).toBe(DIAGNOSTIC_CODES["unknown-status"].description);
+    expect(messageFor("")).toBe(DIAGNOSTIC_CODES["unknown-status"].description);
+  });
+
+  it("sanitises the message of a thrown error too", () => {
+    const collector = new Collector({ tolerant: false });
+    expect(() => collector.add("xml-malformed", "p", "a\nb")).toThrow(/: a b$/);
+  });
+});

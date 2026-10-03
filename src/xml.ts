@@ -124,6 +124,14 @@ function cdataText(value: unknown): string {
   return out;
 }
 
+/** Longest element name kept whole in a path. */
+const MAX_PATH_NAME = 64;
+
+/** An element name as a path segment: a name over 64 characters is cut and marked with "~". */
+function pathName(name: string): string {
+  return name.length > MAX_PATH_NAME ? `${name.slice(0, MAX_PATH_NAME)}~` : name;
+}
+
 function convertElement(
   entry: Record<string, unknown>,
   name: string,
@@ -159,7 +167,7 @@ function convertElement(
     return convertElement(
       element.entry,
       element.name,
-      `${ownPath}/${element.name}`,
+      `${ownPath}/${pathName(element.name)}`,
       index,
       totals.get(element.name) ?? 1,
     );
@@ -245,7 +253,7 @@ export function parseXml(xml: string): XmlNode | null {
     for (const entry of parsed) {
       if (!isRecord(entry)) continue;
       const name = elementName(entry);
-      if (name !== null) return convertElement(entry, name, name, 1, 1);
+      if (name !== null) return convertElement(entry, name, pathName(name), 1, 1);
     }
   } catch (error) {
     // Deep nesting can exhaust the stack during conversion.

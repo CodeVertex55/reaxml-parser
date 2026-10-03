@@ -101,6 +101,23 @@ export class ReaxmlError extends Error {
   }
 }
 
+/** Longest detail kept in a diagnostic message. */
+const MAX_DETAIL = 80;
+
+/**
+ * Makes a detail safe to log: control characters become spaces, runs of whitespace collapse,
+ * the ends are trimmed and the result is cut to 80 characters. Details can come from the
+ * document, so this stops a value from adding lines to a log or filling it.
+ */
+function sanitiseDetail(detail: string): string {
+  let spaced = "";
+  for (const char of detail) {
+    const code = char.codePointAt(0) ?? 0;
+    spaced += code < 0x20 || code === 0x7f ? " " : char;
+  }
+  return spaced.replace(/\s+/g, " ").trim().slice(0, MAX_DETAIL);
+}
+
 /** Internal accumulator for diagnostics. Not part of the public API. */
 export class Collector {
   readonly all: Diagnostic[] = [];
@@ -125,7 +142,8 @@ export class Collector {
    */
   add(code: DiagnosticCode, path: string, detail?: string): void {
     const { severity, description } = DIAGNOSTIC_CODES[code];
-    const message = detail === undefined ? description : `${description}: ${detail}`;
+    const clean = detail === undefined ? "" : sanitiseDetail(detail);
+    const message = clean === "" ? description : `${description}: ${clean}`;
     if (!this.tolerant && severity === "error") {
       throw new ReaxmlError(code, this.listingId, path, message);
     }

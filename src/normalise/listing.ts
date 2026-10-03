@@ -10,7 +10,7 @@ import { parseExtension } from "./extension.js";
 import { parseFeatures } from "./features.js";
 import { parseInspections } from "./inspections.js";
 import { parseMeasure } from "./measures.js";
-import { parseMedia } from "./media.js";
+import { isWebUrl, parseMedia } from "./media.js";
 import { parsePrice, parseRent, parseSold, type MoneyOptions } from "./price.js";
 import { numberField, yesNo } from "./primitives.js";
 
@@ -71,11 +71,16 @@ function buildingOf(node: XmlNode, c: Collector): ListingBase["building"] {
   };
 }
 
+/** The value when it is an http or https address, otherwise null. */
+function webUrlOf(value: string | null): string | null {
+  return value !== null && isWebUrl(value) ? value : null;
+}
+
 function externalLinksOf(node: XmlNode): string[] {
   const links: string[] = [];
   for (const link of children(node, "externalLink")) {
     const href = attr(link, "href");
-    if (href !== null) links.push(href);
+    if (href !== null && isWebUrl(href)) links.push(href);
   }
   return links;
 }
@@ -157,7 +162,7 @@ function assemble(
     images: media.images,
     floorplans: media.floorplans,
     documents: media.documents,
-    videoUrl: attr(child(node, "videoLink"), "href"),
+    videoUrl: webUrlOf(attr(child(node, "videoLink"), "href")),
     externalLinks: externalLinksOf(node),
     inspections: parseInspections(node, c, dates),
     auctionAt,

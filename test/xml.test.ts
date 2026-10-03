@@ -284,3 +284,26 @@ describe("module hygiene", () => {
     expect(source).not.toMatch(/from\s+["'](fs|path|os|util|stream|buffer|crypto)["']/);
   });
 });
+
+describe("long element names in paths", () => {
+  it("cuts a name over 64 characters to 64 characters and a tilde, in the path only", () => {
+    const long = "n".repeat(100);
+    const node = parseXml(`<a><${long}><b/></${long}></a>`);
+    const middle = node?.children[0];
+    expect(middle?.name).toBe(long);
+    expect(middle?.path).toBe(`a/${"n".repeat(64)}~`);
+    expect(middle?.children[0]?.path).toBe(`a/${"n".repeat(64)}~/b`);
+  });
+
+  it("keeps a name of exactly 64 characters whole", () => {
+    const exact = "n".repeat(64);
+    expect(parseXml(`<a><${exact}/></a>`)?.children[0]?.path).toBe(`a/${exact}`);
+  });
+
+  it("cuts a long root name in its path", () => {
+    const long = "r".repeat(70);
+    const root = parseXml(`<${long}/>`);
+    expect(root?.name).toBe(long);
+    expect(root?.path).toBe(`${"r".repeat(64)}~`);
+  });
+});

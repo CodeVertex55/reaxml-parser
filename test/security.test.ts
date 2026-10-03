@@ -9,6 +9,11 @@ function expectClean(text: string, forbidden: readonly string[]): void {
   for (const value of forbidden) expect(text).not.toContain(value);
 }
 
+/** Every own property of an error, plus its message and stack, as one string. */
+function everything(error: Error): string {
+  return `${JSON.stringify(error, Object.getOwnPropertyNames(error))} ${error.message} ${error.stack ?? ""}`;
+}
+
 function capture(run: () => unknown): ReaxmlError {
   try {
     run();
@@ -63,7 +68,16 @@ describe("credentials", () => {
     const xml = '<catalog username="feeduser-SENTINEL" password="feedpass-SENTINEL"/>';
     expectClean(JSON.stringify(parseReaxml(xml)), SENTINELS);
     const error = capture(() => parseReaxml(xml, { tolerant: false }));
-    expectClean(`${error.message} ${error.path}`, SENTINELS);
+    expect(error.code).toBe("empty-document");
+    expectClean(everything(error), SENTINELS);
+  });
+
+  it("never appear when a propertyList with credentials has no children", () => {
+    const xml = feed("", 'username="feeduser-SENTINEL" password="feedpass-SENTINEL"');
+    expectClean(JSON.stringify(parseReaxml(xml)), SENTINELS);
+    const error = capture(() => parseReaxml(xml, { tolerant: false }));
+    expect(error.code).toBe("empty-document");
+    expectClean(everything(error), SENTINELS);
   });
 
   it("never appear when the credential attributes are on a listing instead", () => {
@@ -105,6 +119,70 @@ describe("hidden prices", () => {
     expectClean(JSON.stringify(result), [HIDDEN_AMOUNT]);
     const included = parseReaxml(xml, { includeHiddenPrices: true });
     expectClean(JSON.stringify(included.warnings), [HIDDEN_AMOUNT]);
+  });
+});
+
+describe("link URLs", () => {
+  const hostile: readonly [string, string][] = [
+    ["javascript:", "javascript:alert(document.cookie)"],
+    ["data:", "data:text/html,x"],
+    ["file:", "file:///etc/passwd"],
+    ["a mixed-case scheme", "JaVaScRiPt:alert(1)"],
+    ["a leading-whitespace scheme", "  javascript:alert(1)"],
+    ["a protocol-relative address", "//example.com/x"],
+    ["a bare scheme", "https://"],
+  ];
+
+  const links = (href: string) =>
+    parseReaxml(
+      feed(
+        residential(
+          "TEST0001",
+          `<videoLink href="${href}"/><externalLink href="${href}"/><externalLink href="https://tour.example.com/ok"/>`,
+        ),
+      ),
+    ).listings[0];
+
+  it.each(hostile)("drops %s from videoUrl and externalLinks", (_name, href) => {
+    const listing = links(href);
+    expect(listing?.videoUrl).toBeNull();
+    expect(listing?.externalLinks).toEqual(["https://tour.example.com/ok"]);
+  });
+
+  it("keeps http and https links, in any case of scheme", () => {
+    const listing = parseReaxml(
+      feed(
+        residential(
+          "TEST0001",
+          '<videoLink href="HTTPS://video.example.com/a"/><externalLink href="http://tour.example.com/a"/><externalLink href="https://tour.example.com/b"/>',
+        ),
+      ),
+    ).listings[0];
+    expect(listing?.videoUrl).toBe("HTTPS://video.example.com/a");
+    expect(listing?.externalLinks).toEqual([
+      "http://tour.example.com/a",
+      "https://tour.example.com/b",
+    ]);
+  });
+});
+
+describe("diagnostic details", () => {
+  it("never put a line break in a message", () => {
+    const xml = feed(residential("TEST0001", "", 'status="pend&#10;ing&#13;FAKE LOG LINE"'));
+    const warning = parseReaxml(xml).warnings[0];
+    expect(warning?.code).toBe("unknown-status");
+    expect(warning?.message.includes(String.fromCharCode(10))).toBe(false);
+    expect(warning?.message.includes(String.fromCharCode(13))).toBe(false);
+    expect(warning?.message).toContain("pend ing FAKE LOG LINE");
+  });
+
+  it("keeps a huge element name out of the message and shortens the path", () => {
+    const name = "x".repeat(50_000);
+    const warning = parseReaxml(feed(`<${name}/>`)).warnings[0];
+    expect(warning?.code).toBe("unknown-listing-element");
+    expect(warning?.message.length).toBeLessThan(200);
+    expect(warning?.path.length).toBeLessThan(200);
+    expect(warning?.path).toBe(`propertyList/${"x".repeat(64)}~`);
   });
 });
 

@@ -14,6 +14,11 @@ const KINDS: ReadonlyMap<string, MediaKind> = new Map<string, MediaKind>([
 /** Only web addresses are kept, so a script, file or data URL can never reach a consumer. */
 const WEB_URL = /^https?:\/\/\S/i;
 
+/** Whether a value is an http or https address. Anything else, such as a script URL, is not. */
+export function isWebUrl(value: string): boolean {
+  return WEB_URL.test(value);
+}
+
 /**
  * Reads media from the `objects` children of a listing element and then its legacy `images`
  * children. `img` goes to images, `floorplan` to floorplans and `document` to documents, in
@@ -44,7 +49,7 @@ export function parseMedia(
         );
         continue;
       }
-      if (!WEB_URL.test(url)) {
+      if (!isWebUrl(url)) {
         c.add("media-without-url", node.path);
         continue;
       }

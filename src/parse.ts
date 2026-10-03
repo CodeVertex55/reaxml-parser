@@ -93,7 +93,7 @@ export function parseReaxml(xml: string, options: ParseOptions = {}): ParseResul
   for (const element of root.children) {
     c.withListing(null);
     if (!LISTING_KINDS.has(element.name)) {
-      c.add("unknown-listing-element", element.path, element.name);
+      c.add("unknown-listing-element", element.path);
       continue;
     }
     const listing = normaliseListing(element, c, resolved);

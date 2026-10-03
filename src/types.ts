@@ -58,7 +58,9 @@ export type ListingBase = {
   images: MediaItem[];
   floorplans: MediaItem[];
   documents: MediaItem[];
+  /** An http or https address only; any other kind of link is dropped. */
   videoUrl: string | null;
+  /** http and https addresses only; any other kind of link is dropped. */
   externalLinks: string[];
   inspections: Inspection[];
   auctionAt: string | null;
