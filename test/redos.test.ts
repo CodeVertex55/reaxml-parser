@@ -189,6 +189,7 @@ const cases: readonly Case[] = [
     "status",
     () => parseReaxml(feed(residential("TEST0001", "", `status="${hostile("", "pend&#10;")}"`))),
   ],
+  ["identity check", () => parseReaxml(feed(residential(hostile("", "TEST", "&#x85;"))))],
   [
     "extension coordinates",
     () =>

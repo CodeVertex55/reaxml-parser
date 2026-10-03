@@ -27,8 +27,9 @@ function franchiseOf(listing: XmlNode): boolean | null {
 /**
  * Reads business-for-sale detail from the children of a `business` element. Anything missing
  * gives null, or an empty list for categories. Rent comes from `businessLease`, or the first
- * `rent` when there is none. A rent marked `display="no"` has its amount withheld unless
- * `o.includeHiddenPrices` is set (the default is to withhold). The result has no field to say
+ * `rent` when there is none. A rent whose `display` is anything other than absent, `yes`,
+ * `true` or `1` has its amount withheld unless `o.includeHiddenPrices` is set (the default is
+ * to withhold). The result has no field to say
  * the rent was hidden. Diagnostics never carry amounts.
  */
 export function parseBusiness(

@@ -28,23 +28,40 @@ export function taxOf(node: XmlNode): Price["tax"] {
   return TAX.get(attr(node, "tax")?.toLowerCase() ?? "") ?? "unknown";
 }
 
-/** The value of a node's `display` attribute, trimmed and lower-cased. Null when absent. */
+/** `display` values that show an amount. Compared trimmed and lower-cased. */
+const SHOWN: ReadonlySet<string> = new Set(["yes", "true", "1"]);
+
+/** The value of a node's `display` attribute, trimmed and lower-cased. Null when absent or empty. */
 function displayMode(node: XmlNode): string | null {
   return attr(node, "display")?.toLowerCase() ?? null;
 }
 
 /**
- * Reads the amount of a money element. When the element is marked `display="no"` and hidden
+ * Whether a money element is hidden. This fails closed: the amount is shown only when
+ * `display` is absent or empty, or is `yes`, `true` or `1` in any case, or is `range` where
+ * the caller allows range mode (the sale price only). Any other value, such as `no`, `false`,
+ * `0`, `hidden` or a value nobody has defined, hides the amount.
+ */
+function isHidden(node: XmlNode, rangeAllowed: boolean): boolean {
+  const mode = displayMode(node);
+  if (mode === null || SHOWN.has(mode)) return false;
+  return !(rangeAllowed && mode === "range");
+}
+
+/**
+ * Reads the amount of a money element. When the element is hidden (see `isHidden`) and hidden
  * prices are not wanted, the text is not parsed: the amount is null and, when the element had
  * any text, a `hidden-price-withheld` diagnostic names the element only. Otherwise the amount
- * is parsed, and `hidden` still reports the display flag.
+ * is parsed, and `hidden` still reports whether the element was hidden. `rangeAllowed` is true
+ * only for the sale price, where `display="range"` is a public form.
  */
 export function readMoney(
   node: XmlNode,
   c: Collector,
   o: MoneyOptions,
+  rangeAllowed = false,
 ): { amount: number | null; hidden: boolean } {
-  const hidden = displayMode(node) === "no";
+  const hidden = isHidden(node, rangeAllowed);
   if (hidden && !o.includeHiddenPrices) {
     // An element with no text has nothing to withhold, so no diagnostic is added.
     if (text(node) !== null) c.add("hidden-price-withheld", node.path, node.name);
@@ -75,9 +92,10 @@ function viewOf(listing: XmlNode): string | null {
  * Reads the sale price from the `price` and `priceView` children of a listing element.
  * Returns null when neither exists.
  *
- * `display="no"` marks the price hidden: unless `includeHiddenPrices` is set the amount is null
- * and `hidden-price-withheld` is added. `display="range"` returns the `range` attribute as a
- * range even when hidden prices are not included, because a range is the public form.
+ * The price is shown only when `display` is absent, `yes`, `true`, `1` or `range`. Any other
+ * value marks it hidden: unless `includeHiddenPrices` is set the amount is null and
+ * `hidden-price-withheld` is added. `display="range"` returns the `range` attribute as a range
+ * even when hidden prices are not included, because a range is the public form.
  * `view` comes from `priceView` whatever the display mode. Diagnostics never carry amounts.
  */
 export function parsePrice(listing: XmlNode, c: Collector, o: MoneyOptions): Price | null {
@@ -89,7 +107,7 @@ export function parsePrice(listing: XmlNode, c: Collector, o: MoneyOptions): Pri
       : { amount: null, hidden: false, view, range: null, tax: "unknown" };
   }
 
-  const { amount, hidden } = readMoney(node, c, o);
+  const { amount, hidden } = readMoney(node, c, o, true);
   const range = displayMode(node) === "range" ? parseRange(attr(node, "range")) : null;
   return { amount, hidden, view, range, tax: taxOf(node) };
 }
@@ -101,8 +119,8 @@ function periodOf(node: XmlNode): Rent["period"] {
 /**
  * Reads rent from the `rent` children of a listing element. Several may exist for different
  * periods; the weekly one wins, otherwise the first. A missing or unknown period counts as
- * weekly. Hidden handling is the same as for `parsePrice`. Returns null when there is no
- * `rent` element.
+ * weekly. Hidden handling is the same as for `parsePrice`, except that `display="range"` hides
+ * the amount. Returns null when there is no `rent` element.
  */
 export function parseRent(listing: XmlNode, c: Collector, o: MoneyOptions): Rent | null {
   const nodes = children(listing, "rent");
@@ -115,8 +133,9 @@ export function parseRent(listing: XmlNode, c: Collector, o: MoneyOptions): Rent
 
 /**
  * Reads the `soldDetails` child of a listing element. The price comes from `soldPrice`, or
- * `price` when that is missing, and the date from `soldDate` or `date`. A price marked
- * `display="no"` sets `priceHidden` and is withheld unless `includeHiddenPrices` is set.
+ * `price` when that is missing, and the date from `soldDate` or `date`. A price whose `display`
+ * is anything other than absent, `yes`, `true` or `1` sets `priceHidden` and is withheld unless
+ * `includeHiddenPrices` is set.
  * Returns null when there is no `soldDetails` element.
  */
 export function parseSold(

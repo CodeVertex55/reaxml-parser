@@ -13,6 +13,7 @@ import { parseMeasure } from "./measures.js";
 import { isWebUrl, parseMedia } from "./media.js";
 import { parsePrice, parseRent, parseSold, type MoneyOptions } from "./price.js";
 import { numberField, yesNo } from "./primitives.js";
+import { hasControlCharacter } from "../unsafe-text.js";
 
 /** Options after defaults have been applied. */
 export type ResolvedOptions = {
@@ -85,7 +86,9 @@ function externalLinksOf(node: XmlNode): string[] {
 /**
  * Turns one listing element into a `Listing`. The kind comes from the element name; an element
  * with any other name gives null with no diagnostic. Returns null, after adding
- * `missing-identity` at feed level, when `agentID` or `uniqueID` is missing or empty.
+ * `missing-identity` at feed level, when `agentID` or `uniqueID` is missing or empty, or when
+ * either one contains a control character (C0, DEL, C1, U+2028 or U+2029). Such a value is not a
+ * usable identity, and keeping it would put a line break into every id and diagnostic.
  *
  * The collector's listing context is set to the listing id for the duration of the call and
  * cleared afterwards, so a diagnostic added later never carries a stale id.
@@ -99,6 +102,10 @@ export function normaliseListing(node: XmlNode, c: Collector, o: ResolvedOptions
   const uniqueId = text(child(node, "uniqueID"));
   if (agentId === null || uniqueId === null) {
     c.add("missing-identity", node.path);
+    return null;
+  }
+  if (hasControlCharacter(agentId) || hasControlCharacter(uniqueId)) {
+    c.add("missing-identity", node.path, "identity contains control characters");
     return null;
   }
 

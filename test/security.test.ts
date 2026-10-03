@@ -122,6 +122,145 @@ describe("hidden prices", () => {
   });
 });
 
+describe("money visibility fails closed", () => {
+  /** One listing for each of the five money paths, all with the same display value. */
+  const fivePaths = (display: string): string =>
+    feed(
+      `<residential><agentID>A</agentID><uniqueID>1</uniqueID><price display="${display}">${HIDDEN_AMOUNT}</price></residential>` +
+        `<rental><agentID>A</agentID><uniqueID>2</uniqueID><rent display="${display}">${HIDDEN_AMOUNT}</rent></rental>` +
+        `<residential status="sold"><agentID>A</agentID><uniqueID>3</uniqueID><soldDetails><soldPrice display="${display}">${HIDDEN_AMOUNT}</soldPrice></soldDetails></residential>` +
+        `<commercial><agentID>A</agentID><uniqueID>4</uniqueID><commercialRent display="${display}">${HIDDEN_AMOUNT}</commercialRent></commercial>` +
+        `<business><agentID>A</agentID><uniqueID>5</uniqueID><businessLease display="${display}">${HIDDEN_AMOUNT}</businessLease></business>`,
+    );
+
+  const withheldPaths = [
+    "propertyList/residential[1]/price",
+    "propertyList/rental/rent",
+    "propertyList/residential[2]/soldDetails/soldPrice",
+    "propertyList/commercial/commercialRent",
+    "propertyList/business/businessLease",
+  ];
+
+  it.each([["false"], ["0"], ["hidden"], ["maybe"], ["NO"], [" False "]])(
+    "withholds the amount on all five paths for display=%j",
+    (display) => {
+      const result = parseReaxml(fivePaths(display));
+      expect(result.listings).toHaveLength(5);
+      expectClean(JSON.stringify(result), [HIDDEN_AMOUNT]);
+      const withheld = result.warnings.filter((w) => w.code === "hidden-price-withheld");
+      expect(withheld.map((w) => w.path)).toEqual(withheldPaths);
+    },
+  );
+
+  it.each([["yes"], ["true"], ["1"], ["YES"], [" True "]])(
+    "shows the amount on all five paths for display=%j",
+    (display) => {
+      const result = parseReaxml(fivePaths(display));
+      expect(result.warnings).toEqual([]);
+      const [price, rental, sold, commercial, business] = result.listings;
+      expect(price?.price?.amount).toBe(987654);
+      expect(rental?.kind === "rental" ? rental.rent?.amount : undefined).toBe(987654);
+      expect(sold?.sold?.price).toBe(987654);
+      expect(
+        commercial?.kind === "commercial" ? commercial.commercial.rent?.amount : undefined,
+      ).toBe(987654);
+      expect(business?.kind === "business" ? business.business.rent?.amount : undefined).toBe(
+        987654,
+      );
+    },
+  );
+
+  it("still withholds a hidden amount whatever display value hid it, unless asked not to", () => {
+    const included = parseReaxml(fivePaths("false"), { includeHiddenPrices: true });
+    expect(JSON.stringify(included.listings)).toContain(HIDDEN_AMOUNT);
+    expectClean(JSON.stringify(included.warnings), [HIDDEN_AMOUNT]);
+  });
+});
+
+describe("identities with control characters", () => {
+  // Written as character references so that the XML stays well-formed for every one.
+  const controls: readonly [string, string][] = [
+    ["a line feed", "&#10;"],
+    ["a carriage return", "&#13;"],
+    ["a tab", "&#9;"],
+    ["DEL", "&#127;"],
+    ["a C1 control", "&#x85;"],
+    ["CSI", "&#x9b;"],
+    ["the line separator", "&#x2028;"],
+    ["the paragraph separator", "&#x2029;"],
+  ];
+
+  function hasControlCharacter(text: string): boolean {
+    for (const char of text) {
+      const code = char.codePointAt(0) ?? 0;
+      if (code < 0x20 || (code >= 0x7f && code <= 0x9f) || code === 0x2028 || code === 0x2029) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  it.each(controls)("skips a listing whose uniqueID holds %s", (_name, reference) => {
+    const xml = feed(
+      residential(`TEST${reference}0001`, '<price display="no">1</price>', 'status="bogus"') +
+        residential("TEST0002"),
+    );
+    const result = parseReaxml(xml);
+    expect(result.listings.map((l) => l.id)).toEqual(["XNWTEST:TEST0002"]);
+    expect(result.warnings).toEqual([
+      {
+        code: "missing-identity",
+        severity: "error",
+        message:
+          "Listing without a usable agentID or uniqueID, so it was skipped: identity contains control characters",
+        listingId: null,
+        path: "propertyList/residential[1]",
+      },
+    ]);
+  });
+
+  it.each(controls)("skips a listing whose agentID holds %s", (_name, reference) => {
+    const result = parseReaxml(
+      feed(residential("TEST0001", "", 'status="current"', `XNW${reference}TEST`)),
+    );
+    expect(result.listings).toEqual([]);
+    expect(result.warnings.map((w) => [w.code, w.listingId])).toEqual([["missing-identity", null]]);
+  });
+
+  it("keeps an identity that only has control characters at the ends, which are trimmed", () => {
+    const result = parseReaxml(feed(residential("&#10;TEST0001&#9;")));
+    expect(result.listings.map((l) => l.id)).toEqual(["XNWTEST:TEST0001"]);
+  });
+
+  it("never lets a diagnostic listingId carry a control character", () => {
+    const listings = controls
+      .map(([, reference], i) =>
+        residential(
+          `TEST${reference}${String(i).padStart(4, "0")}`,
+          "<objects><img id='a'/></objects><price display='no'>1</price>",
+          'status="bogus" modTime="0000-00-00"',
+        ),
+      )
+      .join("");
+    const result = parseReaxml(feed(listings));
+    expect(result.listings).toEqual([]);
+    expect(result.warnings).toHaveLength(controls.length);
+    for (const warning of result.warnings) {
+      expect(warning.listingId === null || !hasControlCharacter(warning.listingId)).toBe(true);
+    }
+  });
+
+  it("throws a ReaxmlError with a null listingId when not tolerant", () => {
+    const error = capture(() =>
+      parseReaxml(feed(residential("TEST&#10;0001")), { tolerant: false }),
+    );
+    expect(error.code).toBe("missing-identity");
+    expect(error.listingId).toBeNull();
+    expect(error.message).toContain("identity contains control characters");
+    expect(hasControlCharacter(error.message)).toBe(false);
+  });
+});
+
 describe("link URLs", () => {
   const hostile: readonly [string, string][] = [
     ["javascript:", "javascript:alert(document.cookie)"],

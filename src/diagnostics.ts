@@ -22,7 +22,7 @@ const CODES = {
   },
   "missing-identity": {
     severity: "error",
-    description: "Listing without agentID or uniqueID, so it was skipped",
+    description: "Listing without a usable agentID or uniqueID, so it was skipped",
   },
   "duplicate-listing": {
     severity: "warning",
@@ -46,7 +46,7 @@ const CODES = {
   },
   "hidden-price-withheld": {
     severity: "info",
-    description: "Price marked display=no had its amount withheld",
+    description: "Price hidden by its display attribute had its amount withheld",
   },
   "unparseable-number": {
     severity: "warning",

@@ -214,7 +214,7 @@ describe("run: human output", () => {
   it("prints one line per diagnostic with severity, code, path and message", () => {
     const out = validate("missing-identity").stdout;
     expect(out.split("\n")).toContain(
-      "  error missing-identity propertyList/residential[1] Listing without agentID or uniqueID, so it was skipped",
+      "  error missing-identity propertyList/residential[1] Listing without a usable agentID or uniqueID, so it was skipped",
     );
   });
 
@@ -283,29 +283,46 @@ describe("run: --time-zone", () => {
 });
 
 describe("run: terminal safety", () => {
+  const ESC = String.fromCodePoint(0x1b);
+  const BEL = String.fromCodePoint(0x07);
+  const OVERRIDE = String.fromCodePoint(0x202e);
+  const ISOLATE = String.fromCodePoint(0x2066);
   const hostile = feed(
-    '<residential status="bogus"><agentID>A</agentID><uniqueID>\u001b[31mX\u0007</uniqueID></residential>',
+    `<residential status="bogus&#27;[31m&#x9b;"><agentID>A</agentID><uniqueID>${OVERRIDE}X${ISOLATE}</uniqueID></residential>` +
+      `<residential><agentID>A</agentID><uniqueID>${ESC}[31mY${BEL}</uniqueID></residential>`,
   );
 
-  function hasControlCharacter(text: string): boolean {
+  function hasUnsafeCharacter(text: string): boolean {
     for (const char of text) {
       const code = char.codePointAt(0) ?? 0;
-      if ((code < 0x20 && code !== 0x0a) || code === 0x7f) return true;
+      if (code === 0x0a) continue;
+      if (code < 0x20 || (code >= 0x7f && code <= 0x9f)) return true;
+      if (code === 0x2028 || code === 0x2029 || code === 0x200e || code === 0x200f) return true;
+      if ((code >= 0x202a && code <= 0x202e) || (code >= 0x2066 && code <= 0x2069)) return true;
     }
     return false;
   }
 
-  it("replaces control characters in listing ids in human output", () => {
+  it("replaces bidirectional controls in listing ids in human output", () => {
     const out = cli(["validate", "feed.xml"], { "feed.xml": hostile });
     expect(out.stdout).toContain("unknown-status");
-    expect(out.stdout).toContain("Listing A:?[31mX?:");
-    expect(hasControlCharacter(out.stdout + out.stderr)).toBe(false);
+    expect(out.stdout).toContain("Listing A:?X?:");
+    expect(hasUnsafeCharacter(out.stdout + out.stderr)).toBe(false);
+  });
+
+  it("skips a listing whose id holds control characters, without printing the id", () => {
+    const out = cli(["validate", "feed.xml"], { "feed.xml": hostile });
+    expect(out.stdout).toContain(
+      "  error missing-identity propertyList/residential[2] Listing without a usable agentID or uniqueID, so it was skipped: identity contains control characters",
+    );
+    expect(out.stdout).not.toContain("[31mY");
   });
 
   it("leaves --json to JSON escaping", () => {
     const out = cli(["validate", "feed.xml", "--json"], { "feed.xml": hostile });
-    expect(hasControlCharacter(out.stdout)).toBe(false);
     expect(JSON.parse(out.stdout)).toHaveProperty("warnings");
+    expect(out.stdout).not.toContain(ESC);
+    expect(out.stdout).not.toContain(BEL);
   });
 });
 

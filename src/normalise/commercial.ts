@@ -103,9 +103,10 @@ function categoriesOf(listing: XmlNode): string[] {
 
 /**
  * Reads commercial detail from the children of a `commercial` or `commercialLand` element.
- * Anything missing gives null, or an empty list for categories. A `commercialRent` marked
- * `display="no"` has its amount withheld unless `includeHiddenPrices` is set, with the same
- * handling as the other money fields. Diagnostics never carry amounts.
+ * Anything missing gives null, or an empty list for categories. A `commercialRent` whose
+ * `display` is anything other than absent, `yes`, `true` or `1` has its amount withheld unless
+ * `includeHiddenPrices` is set, with the same handling as the other money fields. Diagnostics
+ * never carry amounts.
  */
 export function parseCommercial(
   listing: XmlNode,

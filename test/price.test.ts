@@ -72,12 +72,26 @@ describe("parsePrice shown prices", () => {
     expect(result?.amount).toBe(500000);
   });
 
-  it.each([["yes"], ["YES"], ["maybe"], [""], ["1"]])("treats display=%j as shown", (value) => {
-    const { result, diagnostics } = price(`<price display="${value}">500000</price>`);
-    expect(result?.hidden).toBe(false);
-    expect(result?.amount).toBe(500000);
-    expect(diagnostics).toEqual([]);
-  });
+  it.each([["yes"], ["YES"], [" Yes "], ["true"], ["TRUE"], ["1"], [""], ["  "]])(
+    "treats display=%j as shown",
+    (value) => {
+      const { result, diagnostics } = price(`<price display="${value}">500000</price>`);
+      expect(result?.hidden).toBe(false);
+      expect(result?.amount).toBe(500000);
+      expect(diagnostics).toEqual([]);
+    },
+  );
+
+  it.each([["no"], ["false"], ["FALSE"], ["0"], ["hidden"], ["maybe"], ["show"], ["2"]])(
+    "fails closed and treats display=%j as hidden",
+    (value) => {
+      const out = price(`<price display="${value}">${HIDDEN}</price>`);
+      expect(out.result?.hidden).toBe(true);
+      expect(out.result?.amount).toBeNull();
+      expect(out.diagnostics.map((d) => d.code)).toEqual(["hidden-price-withheld"]);
+      expectNoLeak(out);
+    },
+  );
 
   it("returns the amount null with no diagnostic for an empty price element", () => {
     const { result, diagnostics } = price('<price display="yes"></price>');
@@ -311,6 +325,13 @@ describe("parseRent", () => {
     const { result, diagnostics } = rent('<rent period="weekly">$650</rent>');
     expect(result).toEqual({ amount: 650, period: "week", hidden: false, view: null });
     expect(diagnostics).toEqual([]);
+  });
+
+  it("hides a rent marked display=range, because range mode is for the sale price only", () => {
+    const out = rent(`<rent period="weekly" display="range">${HIDDEN}</rent>`);
+    expect(out.result).toEqual({ amount: null, period: "week", hidden: true, view: null });
+    expect(out.diagnostics.map((d) => d.code)).toEqual(["hidden-price-withheld"]);
+    expectNoLeak(out);
   });
 
   it.each([
