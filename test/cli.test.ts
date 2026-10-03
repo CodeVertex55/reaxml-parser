@@ -234,9 +234,9 @@ describe("run: human output", () => {
   it("uses no dashes as punctuation and no exclamation marks", () => {
     for (const name of ["mixed", "zero-dates", "missing-identity", "credentials"]) {
       const out = validate(name);
-      expect(out.stdout + out.stderr).not.toMatch(/[–—!]/);
+      expect(out.stdout + out.stderr).not.toMatch(/[\u2013\u2014!]/);
     }
-    expect(cli(["--help"]).stdout).not.toMatch(/[–—!]/);
+    expect(cli(["--help"]).stdout).not.toMatch(/[\u2013\u2014!]/);
   });
 });
 
