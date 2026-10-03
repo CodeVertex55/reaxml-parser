@@ -8,13 +8,19 @@
     "type": "git",
     "url": "git+https://github.com/talha55/reaxml-parser.git"
   },
+  "homepage": "https://github.com/talha55/reaxml-parser#readme",
+  "bugs": {
+    "url": "https://github.com/talha55/reaxml-parser/issues"
+  },
   "keywords": [
     "reaxml",
     "real-estate",
     "xml",
+    "xml-parser",
     "parser",
     "typescript",
-    "australia"
+    "australia",
+    "proptech"
   ],
   "type": "module",
   "engines": {
@@ -33,7 +39,8 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
-    }
+    },
+    "./package.json": "./package.json"
   },
   "bin": {
     "reaxml-parser": "./dist/cli.js"
@@ -46,8 +53,9 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsup",
-    "prepare": "tsup",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "npm run clean && tsup",
+    "prepare": "npm run clean && tsup",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
