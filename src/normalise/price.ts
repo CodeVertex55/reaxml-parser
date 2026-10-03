@@ -30,9 +30,9 @@ function displayMode(node: XmlNode): string | null {
 
 /**
  * Reads the amount of a money element. When the element is marked `display="no"` and hidden
- * prices are not wanted, the text is not read at all: the amount is null and a
- * `hidden-price-withheld` diagnostic names the element only. Otherwise the amount is parsed,
- * and `hidden` still reports the display flag.
+ * prices are not wanted, the text is not parsed: the amount is null and, when the element had
+ * any text, a `hidden-price-withheld` diagnostic names the element only. Otherwise the amount
+ * is parsed, and `hidden` still reports the display flag.
  */
 function readMoney(
   node: XmlNode,
@@ -41,20 +41,25 @@ function readMoney(
 ): { amount: number | null; hidden: boolean } {
   const hidden = displayMode(node) === "no";
   if (hidden && !o.includeHiddenPrices) {
-    c.add("hidden-price-withheld", node.path, node.name);
+    // An element with no text has nothing to withhold, so no diagnostic is added.
+    if (text(node) !== null) c.add("hidden-price-withheld", node.path, node.name);
     return { amount: null, hidden };
   }
   return { amount: numberField(node, c), hidden };
 }
 
-/** Parses a range attribute such as "400000-450000" or "$400,000 - $450,000". */
+/**
+ * Parses a range attribute such as "400000-450000" or "$400,000 - $450,000". A reversed range
+ * such as "450000-400000" is returned swapped, so min is never greater than max.
+ */
 function parseRange(value: string | null): { min: number; max: number } | null {
   if (value === null) return null;
   const parts = value.split("-");
   if (parts.length !== 2) return null;
   const min = parseNumber(parts[0] ?? null);
   const max = parseNumber(parts[1] ?? null);
-  return min === null || max === null ? null : { min, max };
+  if (min === null || max === null) return null;
+  return min <= max ? { min, max } : { min: max, max: min };
 }
 
 function viewOf(listing: XmlNode): string | null {

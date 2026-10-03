@@ -124,6 +124,12 @@ describe("parseDate with a time zone", () => {
     expect(run("2026-10-04T02:30:00", "Australia/Sydney").result).toBe("2026-10-03T16:30:00Z");
   });
 
+  it("shifts a skipped wall time in Lord Howe, whose gap is 30 minutes, by the gap", () => {
+    // Lord Howe goes from 02:00 (+10:30) to 02:30 (+11) on the same morning, so 02:15 never
+    // happens. It is read with the offset from before the gap, which equals 02:45 at +11.
+    expect(run("2026-10-04T02:15:00", "Australia/Lord_Howe").result).toBe("2026-10-03T15:45:00Z");
+  });
+
   it("shifts a skipped wall time in a half-hour zone by the gap", () => {
     // Adelaide goes from 02:00 (+9:30) to 03:00 (+10:30) on the same morning.
     expect(run("2026-10-04T02:30:00", "Australia/Adelaide").result).toBe("2026-10-03T17:00:00Z");

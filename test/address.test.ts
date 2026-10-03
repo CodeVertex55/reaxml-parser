@@ -223,6 +223,16 @@ describe("parseAddress streetLine composition", () => {
     expect(result.streetLine).toBe("80 Sample Road");
   });
 
+  it("rule 4: a sub number and a lot number without a street number use the sub number only", () => {
+    const { result, diagnostics } = streetLine(
+      "<subNumber>9</subNumber><lotNumber>5</lotNumber><street>Example Street</street>",
+    );
+    expect(result.streetLine).toBe("9 Example Street");
+    expect(result.subNumber).toBe("9");
+    expect(result.lotNumber).toBe("5");
+    expect(diagnostics).toEqual([]);
+  });
+
   it("rule 6: a street alone", () => {
     expect(streetLine("<street>Example Street</street>").result.streetLine).toBe("Example Street");
   });

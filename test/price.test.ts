@@ -168,6 +168,15 @@ describe("parsePrice hidden prices", () => {
     expectNoLeak(out);
   });
 
+  it("adds no hidden-price-withheld for a hidden price with no text", () => {
+    for (const inner of ['<price display="no"/>', '<price display="no">   </price>']) {
+      const { result, diagnostics } = price(inner);
+      expect(result?.hidden).toBe(true);
+      expect(result?.amount).toBeNull();
+      expect(diagnostics).toEqual([]);
+    }
+  });
+
   it("does not leak the raw text of a hidden non-numeric price when hidden prices are included", () => {
     const out = price(`<price display="no">Call ${HIDDEN}</price>`, true);
     expect(out.result?.amount).toBeNull();
@@ -227,6 +236,27 @@ describe("parsePrice range", () => {
 
   it("ignores a range attribute when display is not range", () => {
     expect(price('<price display="yes" range="1-2">500000</price>').result?.range).toBeNull();
+  });
+
+  it("swaps a reversed range so that min is not greater than max", () => {
+    const { result, diagnostics } = price('<price display="range" range="450000-400000"/>');
+    expect(result?.range).toEqual({ min: 400000, max: 450000 });
+    expect(diagnostics).toEqual([]);
+  });
+
+  it("leaves an equal range alone", () => {
+    expect(price('<price display="range" range="400000-400000"/>').result?.range).toEqual({
+      min: 400000,
+      max: 400000,
+    });
+  });
+
+  it("gives a null range when display=no carries a range attribute", () => {
+    const out = price(`<price display="no" range="400000-450000">${HIDDEN}</price>`);
+    expect(out.result?.range).toBeNull();
+    expect(out.result?.hidden).toBe(true);
+    expect(out.result?.amount).toBeNull();
+    expectNoLeak(out);
   });
 });
 
@@ -342,6 +372,12 @@ describe("parseRent", () => {
     expectNoLeak(out);
   });
 
+  it("adds no hidden-price-withheld for a hidden rent with no text", () => {
+    const { result, diagnostics } = rent('<rent period="weekly" display="no"/>');
+    expect(result).toEqual({ amount: null, period: "week", hidden: true, view: null });
+    expect(diagnostics).toEqual([]);
+  });
+
   it("includes a hidden rent when includeHiddenPrices is set", () => {
     const { result, diagnostics } = rent(
       `<rent period="monthly" display="no">${HIDDEN}</rent>`,
@@ -436,6 +472,14 @@ describe("parseSold", () => {
     expect(out.diagnostics.map((d) => d.code)).toEqual(["hidden-price-withheld"]);
     expect(out.diagnostics[0]?.message).toContain(name);
     expectNoLeak(out);
+  });
+
+  it("adds no hidden-price-withheld for a hidden sold price with no text", () => {
+    const { result, diagnostics } = sold(
+      '<soldDetails><soldPrice display="no"/><soldDate>2026-03-04</soldDate></soldDetails>',
+    );
+    expect(result).toEqual({ price: null, priceHidden: true, date: "2026-03-04" });
+    expect(diagnostics).toEqual([]);
   });
 
   it("includes a hidden sold price when includeHiddenPrices is set", () => {
