@@ -12,7 +12,7 @@ npm ci
 
 ## Run the checks
 
-CI runs these in this order on Node 20 and 22. Run them before you open a pull request.
+CI runs these in this order on Node 20, 22 and 24. Run them before you open a pull request.
 
 ```sh
 npm run typecheck
