@@ -82,7 +82,17 @@ describe("parseXml text", () => {
 
   it("does not expand entities declared in a DOCTYPE", () => {
     const a = root('<!DOCTYPE a [<!ENTITY e "boom">]><a>&e;</a>');
-    expect(a.text).not.toContain("boom");
+    expect(a.text).toBe("&e;");
+  });
+
+  it("decodes references above the basic plane and rejects code points past U+10FFFF", () => {
+    expect(root("<a>&#x1F600;</a>").text).toBe("\u{1F600}");
+    expect(root("<a>&#128512;</a>").text).toBe("\u{1F600}");
+    expect(root("<a>&#x110000;</a>").text).toBe("&#x110000;");
+  });
+
+  it("turns &amp;lt; into the literal text &lt; without a second decode", () => {
+    expect(root("<a>&amp;lt;</a>").text).toBe("&lt;");
   });
 
   it("reads CDATA as literal text without decoding it", () => {
@@ -194,6 +204,26 @@ describe("empty and malformed documents", () => {
     expect(parseXml("  \n ")).toBeNull();
     expect(parseXml('<?xml version="1.0" encoding="UTF-8"?>')).toBeNull();
     expect(parseXml('<?xml version="1.0"?>\n<!-- nothing here -->\n')).toBeNull();
+  });
+
+  it("returns null for a document that is only a DOCTYPE", () => {
+    expect(parseXml("<!DOCTYPE a>")).toBeNull();
+    expect(parseXml('<?xml version="1.0"?>\n<!DOCTYPE a [<!ENTITY e "x">]>\n')).toBeNull();
+  });
+
+  it("handles unterminated prolog constructs in linear time", () => {
+    for (const unit of ["<?", "<!--"]) {
+      const started = performance.now();
+      let caught: unknown;
+      try {
+        parseXml(unit.repeat(200000));
+      } catch (error) {
+        caught = error;
+      }
+      const elapsed = performance.now() - started;
+      expect(caught).toBeInstanceOf(XmlParseError);
+      expect(elapsed).toBeLessThan(1000);
+    }
   });
 
   it("throws XmlParseError on mismatched tags", () => {

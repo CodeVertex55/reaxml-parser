@@ -164,9 +164,51 @@ function convertElement(
   return { name, attrs: convertAttributes(entry), children, text, path: ownPath };
 }
 
-/** True when nothing remains after removing XML declarations, processing instructions and comments. */
+/** Whether a character code is whitespace or a byte order mark. */
+function isBlank(code: number): boolean {
+  return code === 0x20 || code === 0x9 || code === 0xa || code === 0xd || code === 0xfeff;
+}
+
+/**
+ * True when the document holds nothing but whitespace, XML declarations, processing
+ * instructions, comments and a DOCTYPE. This is one forward scan using indexOf from the
+ * current position, so its cost is linear in the input. An unterminated construct counts as
+ * content, which lets the validator report it as malformed.
+ */
 function hasNoContent(xml: string): boolean {
-  return xml.replace(/<\?[\s\S]*?\?>|<!--[\s\S]*?-->/g, "").trim() === "";
+  const length = xml.length;
+  let pos = 0;
+  for (;;) {
+    while (pos < length && isBlank(xml.charCodeAt(pos))) pos++;
+    if (pos >= length) return true;
+
+    let close: number;
+    if (xml.startsWith("<?", pos)) {
+      close = xml.indexOf("?>", pos + 2);
+      if (close === -1) return false;
+      pos = close + 2;
+    } else if (xml.startsWith("<!--", pos)) {
+      close = xml.indexOf("-->", pos + 4);
+      if (close === -1) return false;
+      pos = close + 3;
+    } else if (xml.startsWith("<!DOCTYPE", pos)) {
+      // Walk to the first ">" or "[" without looking past it, then skip an internal subset.
+      let i = pos + 9;
+      while (i < length && xml[i] !== ">" && xml[i] !== "[") i++;
+      if (i >= length) return false;
+      if (xml[i] === "[") {
+        const subsetEnd = xml.indexOf("]", i + 1);
+        if (subsetEnd === -1) return false;
+        i = subsetEnd + 1;
+        const gt = xml.indexOf(">", i);
+        if (gt === -1) return false;
+        i = gt;
+      }
+      pos = i + 1;
+    } else {
+      return false;
+    }
+  }
 }
 
 /**
@@ -195,10 +237,16 @@ export function parseXml(xml: string): XmlNode | null {
   }
 
   if (!Array.isArray(parsed)) return null;
-  for (const entry of parsed) {
-    if (!isRecord(entry)) continue;
-    const name = elementName(entry);
-    if (name !== null) return convertElement(entry, name, name, 1, 1);
+  try {
+    for (const entry of parsed) {
+      if (!isRecord(entry)) continue;
+      const name = elementName(entry);
+      if (name !== null) return convertElement(entry, name, name, 1, 1);
+    }
+  } catch (error) {
+    // Deep nesting can exhaust the stack during conversion.
+    if (error instanceof RangeError) throw new XmlParseError(0, 0);
+    throw error;
   }
   return null;
 }
