@@ -5,11 +5,14 @@ import { parseXml } from "../src/xml.js";
 
 const HIDDEN = "987654";
 
-function run(inner: string) {
+function run(inner: string, includeHiddenPrices?: boolean) {
   const root = parseXml(`<business>${inner}</business>`);
   if (root === null) throw new Error("test xml has no root");
   const c = new Collector({ tolerant: true });
-  const result = parseBusiness(root, c);
+  const result =
+    includeHiddenPrices === undefined
+      ? parseBusiness(root, c)
+      : parseBusiness(root, c, { includeHiddenPrices });
   return { result, diagnostics: c.all };
 }
 
@@ -139,6 +142,32 @@ describe("parseBusiness rent", () => {
     ]);
     expect(JSON.stringify(result)).not.toContain(HIDDEN);
     expect(JSON.stringify(diagnostics)).not.toContain(HIDDEN);
+  });
+
+  it("returns a hidden amount when includeHiddenPrices is set", () => {
+    const { result, diagnostics } = run(
+      `<businessLease display="no" period="month">${HIDDEN}</businessLease>`,
+      true,
+    );
+    expect(result.rent).toEqual({ amount: 987654, period: "month" });
+    expect(diagnostics).toEqual([]);
+  });
+
+  it("still withholds a hidden amount when includeHiddenPrices is false", () => {
+    const { result } = run(`<businessLease display="no">${HIDDEN}</businessLease>`, false);
+    expect(result.rent).toEqual({ amount: null, period: "annual" });
+  });
+
+  it("gives a null amount and the default period for an empty businessLease", () => {
+    const { result, diagnostics } = run("<businessLease/>");
+    expect(result.rent).toEqual({ amount: null, period: "annual" });
+    expect(diagnostics).toEqual([]);
+  });
+
+  it("does not echo unparseable rent text into the diagnostic", () => {
+    const { diagnostics } = run("<businessLease>secret-text-SENTINEL</businessLease>");
+    expect(diagnostics).toEqual([expect.objectContaining({ code: "unparseable-number" })]);
+    expect(JSON.stringify(diagnostics)).not.toContain("SENTINEL");
   });
 
   it("gives a null amount and a diagnostic for text that is not a number", () => {

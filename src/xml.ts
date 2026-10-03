@@ -2,7 +2,11 @@ import { XMLParser, XMLValidator } from "fast-xml-parser";
 
 /** One element of a parsed document, with its children in document order. */
 export type XmlNode = {
-  /** Element name exactly as written, including any namespace prefix. */
+  /**
+   * Element name as written, including any namespace prefix. The XML library prefixes names that
+   * match `Object.prototype` members (such as `toString`) with `__`, and rejects `__proto__`,
+   * `constructor` and `prototype` as malformed.
+   */
   name: string;
   /** Attribute values as decoded strings, keyed by the names as written. */
   attrs: Record<string, string>;

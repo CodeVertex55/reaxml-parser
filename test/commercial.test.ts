@@ -266,6 +266,20 @@ describe("parseCommercial rent per square metre", () => {
   it("is null for an empty element", () => {
     expect(run("<rentPerSquareMeter/>").result.rentPerSquareMeter).toBeNull();
   });
+
+  it("is null for an empty range", () => {
+    const { result, diagnostics } = run("<rentPerSquareMeter><range/></rentPerSquareMeter>");
+    expect(result.rentPerSquareMeter).toBeNull();
+    expect(diagnostics).toEqual([]);
+  });
+
+  it("is null for a range whose bounds are empty", () => {
+    const { result, diagnostics } = run(
+      "<rentPerSquareMeter><range><min/><max> </max></range></rentPerSquareMeter>",
+    );
+    expect(result.rentPerSquareMeter).toBeNull();
+    expect(diagnostics).toEqual([]);
+  });
 });
 
 describe("parseCommercial scalar fields", () => {

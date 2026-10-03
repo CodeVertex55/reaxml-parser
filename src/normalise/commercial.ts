@@ -66,7 +66,7 @@ function rentOf(listing: XmlNode, c: Collector, o: MoneyOptions): CommercialDeta
 /**
  * Reads rent per square metre as a range. The element holds either a `range` child with `min`
  * and `max` children, or plain text that counts as both bounds. A reversed range is swapped.
- * Returns null when the element is absent or empty.
+ * Returns null when the element is absent or empty, including a `range` with no bounds.
  */
 function rentPerSquareMeterOf(
   listing: XmlNode,
@@ -77,8 +77,13 @@ function rentPerSquareMeterOf(
 
   const range = child(node, "range");
   if (range !== undefined) {
-    const min = numberField(child(range, "min"), c);
-    const max = numberField(child(range, "max"), c);
+    const minNode = child(range, "min");
+    const maxNode = child(range, "max");
+    const min = numberField(minNode, c);
+    const max = numberField(maxNode, c);
+    if (min === null && max === null && text(minNode) === null && text(maxNode) === null) {
+      return null;
+    }
     return min !== null && max !== null && min > max ? { min: max, max: min } : { min, max };
   }
 
