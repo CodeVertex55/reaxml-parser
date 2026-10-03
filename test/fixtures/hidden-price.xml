@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <residential status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0001</uniqueID>
+    <price display="no">987654</price>
+    <priceView>Contact agent</priceView>
+    <headline>Listing with a withheld price</headline>
+  </residential>
+  <residential status="sold">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0002</uniqueID>
+    <headline>Sold listing with a withheld sale price</headline>
+    <soldDetails>
+      <soldPrice display="no">987654</soldPrice>
+      <soldDate>2026-08-01</soldDate>
+    </soldDetails>
+  </residential>
+</propertyList>

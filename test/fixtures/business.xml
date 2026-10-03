@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <business modTime="2026-09-10-13:20:00" status="current">
+    <agentID>XNWDEMO</agentID>
+    <uniqueID>TEST0007</uniqueID>
+    <price display="yes">285000</price>
+    <businessCategory>
+      <name>Food and Beverage</name>
+      <businessSubCategory>
+        <name>Cafe</name>
+      </businessSubCategory>
+    </businessCategory>
+    <takings>$14,000 per week</takings>
+    <franchise value="no"/>
+    <terms>Lease to 2031 plus option</terms>
+    <businessLease period="annual">64000</businessLease>
+    <address display="yes">
+      <streetNumber>7</streetNumber>
+      <street>Sample Road</street>
+      <suburb display="yes">Sampleton</suburb>
+      <state>WA</state>
+      <postcode>0007</postcode>
+    </address>
+    <headline>Busy corner cafe with loyal local trade</headline>
+    <description>Fully equipped kitchen, outdoor seating and a long lease.</description>
+  </business>
+</propertyList>

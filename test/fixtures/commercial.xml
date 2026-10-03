@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <commercial modTime="2026-09-15-08:15:00" status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0005</uniqueID>
+    <authority value="exclusive"/>
+    <commercialListingType value="both"/>
+    <commercialCategory name="Offices"/>
+    <commercialCategory name="Retail"/>
+    <price display="yes" tax="exclusive">1200000</price>
+    <commercialRent period="annual" plusOutgoings="yes" tax="exclusive">96000</commercialRent>
+    <rentPerSquareMeter>
+      <range>
+        <min>300</min>
+        <max>380</max>
+      </range>
+    </rentPerSquareMeter>
+    <outgoings>18500</outgoings>
+    <return>8.1</return>
+    <tenancy value="tenanted"/>
+    <zone>Commercial 2</zone>
+    <carSpaces>6</carSpaces>
+    <currentLeaseEndDate>2028-06-30</currentLeaseEndDate>
+    <address display="yes">
+      <streetNumber>3</streetNumber>
+      <street>Placeholder Avenue</street>
+      <suburb display="yes">Mockford</suburb>
+      <state>NSW</state>
+      <postcode>0005</postcode>
+    </address>
+    <headline>Two level office and retail building</headline>
+    <description>Corner position with street frontage and on-site parking.</description>
+    <buildingDetails>
+      <area unit="squareMeter">240</area>
+    </buildingDetails>
+    <landDetails>
+      <area unit="squareMeter">610</area>
+    </landDetails>
+  </commercial>
+</propertyList>

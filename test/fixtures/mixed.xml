@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList date="2026-10-01-08:00:00">
+  <residential modTime="2026-09-30-09:00:00" status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0101</uniqueID>
+    <price display="yes">540000</price>
+    <address display="yes"><streetNumber>1</streetNumber><street>Example Street</street><suburb display="yes">Testville</suburb><state>WA</state><postcode>0001</postcode></address>
+    <category name="House"/>
+    <headline>Three bedroom house with a sunny yard</headline>
+    <features><bedrooms>3</bedrooms><bathrooms>1</bathrooms></features>
+  </residential>
+  <residential modTime="2026-09-29-09:00:00" status="sold">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0102</uniqueID>
+    <address display="yes"><streetNumber>2</streetNumber><street>Example Street</street><suburb display="yes">Testville</suburb><state>WA</state><postcode>0001</postcode></address>
+    <category name="House"/>
+    <headline>Recently sold family home</headline>
+    <soldDetails><soldPrice>612000</soldPrice><soldDate>2026-09-27</soldDate></soldDetails>
+  </residential>
+  <rental modTime="2026-09-28-09:00:00" status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0103</uniqueID>
+    <rent period="week">620</rent>
+    <bond>2480</bond>
+    <address display="yes"><streetNumber>3</streetNumber><street>Sample Road</street><suburb display="yes">Mockford</suburb><state>NSW</state><postcode>0002</postcode></address>
+    <category name="Townhouse"/>
+    <headline>Modern townhouse close to transport</headline>
+  </rental>
+  <rental modTime="2026-09-27-09:00:00" status="leased">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0104</uniqueID>
+    <rent period="week">480</rent>
+    <address display="yes"><streetNumber>4</streetNumber><street>Sample Road</street><suburb display="yes">Mockford</suburb><state>NSW</state><postcode>0002</postcode></address>
+    <category name="Unit"/>
+    <headline>Leased one bedroom unit</headline>
+  </rental>
+  <land modTime="2026-09-26-09:00:00" status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0105</uniqueID>
+    <price display="yes">195000</price>
+    <address display="yes"><lotNumber>9</lotNumber><street>Placeholder Avenue</street><suburb display="yes">Sampleton</suburb><state>WA</state><postcode>0003</postcode></address>
+    <landCategory name="Residential"/>
+    <headline>Vacant block ready to build</headline>
+    <landDetails><area unit="squareMeter">620</area></landDetails>
+  </land>
+  <land modTime="2026-09-25-09:00:00" status="withdrawn">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0106</uniqueID>
+    <address display="yes"><lotNumber>10</lotNumber><street>Placeholder Avenue</street><suburb display="yes">Sampleton</suburb><state>WA</state><postcode>0003</postcode></address>
+    <landCategory name="Residential"/>
+    <headline>Withdrawn block</headline>
+  </land>
+  <rural modTime="2026-09-24-09:00:00" status="current">
+    <agentID>XNWDEMO</agentID>
+    <uniqueID>TEST0107</uniqueID>
+    <price display="yes">980000</price>
+    <address display="yes"><streetNumber>800</streetNumber><street>Sample Road</street><suburb display="yes">Sampleton</suburb><state>WA</state><postcode>0004</postcode></address>
+    <ruralCategory name="Grazing"/>
+    <headline>Grazing property with good fencing</headline>
+    <landDetails><area unit="hectare">64</area></landDetails>
+  </rural>
+  <commercial modTime="2026-09-23-09:00:00" status="current">
+    <agentID>XNWDEMO</agentID>
+    <uniqueID>TEST0108</uniqueID>
+    <commercialListingType value="lease"/>
+    <commercialCategory name="Industrial"/>
+    <commercialRent period="annual" tax="exclusive">54000</commercialRent>
+    <address display="yes"><streetNumber>5</streetNumber><street>Placeholder Avenue</street><suburb display="yes">Mockford</suburb><state>NSW</state><postcode>0005</postcode></address>
+    <headline>Warehouse with roller door access</headline>
+  </commercial>
+  <commercial modTime="2026-09-22-09:00:00" status="offmarket">
+    <agentID>XNWDEMO</agentID>
+    <uniqueID>TEST0109</uniqueID>
+    <commercialListingType value="sale"/>
+    <commercialCategory name="Retail"/>
+    <price display="yes">730000</price>
+    <address display="yes"><streetNumber>6</streetNumber><street>Placeholder Avenue</street><suburb display="yes">Mockford</suburb><state>NSW</state><postcode>0005</postcode></address>
+    <headline>Off market shopfront</headline>
+  </commercial>
+  <commercialLand modTime="2026-09-21-09:00:00" status="current">
+    <agentID>XNWDEMO</agentID>
+    <uniqueID>TEST0110</uniqueID>
+    <commercialListingType value="sale"/>
+    <commercialCategory name="Development Site"/>
+    <price display="yes">1500000</price>
+    <address display="yes"><street>Example Street</street><suburb display="yes">Testville</suburb><state>WA</state><postcode>0006</postcode></address>
+    <headline>Corner development site</headline>
+    <landDetails><area unit="hectare">1.1</area></landDetails>
+  </commercialLand>
+  <business modTime="2026-09-20-09:00:00" status="sold">
+    <agentID>XNWDEMO</agentID>
+    <uniqueID>TEST0111</uniqueID>
+    <businessCategory><name>Retail</name></businessCategory>
+    <price display="yes">150000</price>
+    <address display="yes"><streetNumber>8</streetNumber><street>Sample Road</street><suburb display="yes">Sampleton</suburb><state>WA</state><postcode>0007</postcode></address>
+    <headline>Sold convenience store</headline>
+  </business>
+  <holidayRental modTime="2026-09-19-09:00:00" status="current">
+    <agentID>XNWDEMO</agentID>
+    <uniqueID>TEST0112</uniqueID>
+    <priceView>From $1,800 per week</priceView>
+    <address display="yes"><streetNumber>9</streetNumber><street>Placeholder Avenue</street><suburb display="yes">Mockford</suburb><state>NSW</state><postcode>0008</postcode></address>
+    <holidayCategory name="Cottage"/>
+    <headline>Quiet cottage near the water</headline>
+  </holidayRental>
+</propertyList>

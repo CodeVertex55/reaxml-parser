@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <residential status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0001</uniqueID>
+    <headline>Listing with coordinates that are not numbers</headline>
+    <extraFields>
+      <latitude>not-a-number</latitude>
+      <longitude>140.5678</longitude>
+    </extraFields>
+  </residential>
+</propertyList>

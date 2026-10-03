@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <residential status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0001</uniqueID>
+    <headline>First version of the listing</headline>
+  </residential>
+  <residential status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0002</uniqueID>
+    <headline>A different listing</headline>
+  </residential>
+  <residential status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0001</uniqueID>
+    <headline>Second version of the listing</headline>
+  </residential>
+</propertyList>

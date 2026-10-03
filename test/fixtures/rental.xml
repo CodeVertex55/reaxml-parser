@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList date="2026-10-01-08:00:00">
+  <rental modTime="2026-09-28-16:45:00" status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0002</uniqueID>
+    <underOffer value="no"/>
+    <listingAgent id="1">
+      <name>Jordan Example</name>
+      <telephone type="mobile">0491 570 156</telephone>
+      <email>jordan.example@example.com</email>
+    </listingAgent>
+    <rent period="month">3400</rent>
+    <rent period="week">785</rent>
+    <priceView>$785 per week</priceView>
+    <bond>3140</bond>
+    <dateAvailable>2026-11-01</dateAvailable>
+    <address display="yes">
+      <subNumber>4</subNumber>
+      <streetNumber>80</streetNumber>
+      <street>Sample Road</street>
+      <suburb display="yes">Mockford</suburb>
+      <state>NSW</state>
+      <postcode>0002</postcode>
+    </address>
+    <category name="Unit"/>
+    <headline>Bright two bedroom unit near the Mockford shops</headline>
+    <description>Secure unit with a sunny balcony and a single lock-up garage.</description>
+    <features>
+      <bedrooms>2</bedrooms>
+      <bathrooms>1</bathrooms>
+      <garages>1</garages>
+      <airConditioning>yes</airConditioning>
+      <furnished>no</furnished>
+    </features>
+    <inspectionTimes>
+      <inspection>2026-11-07 10:00 to 10:15</inspection>
+    </inspectionTimes>
+    <objects>
+      <img id="m" url="https://img.example.com/TEST0002/lounge.jpg" format="jpg"/>
+    </objects>
+  </rental>
+</propertyList>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <land modTime="2026-09-20-09:00:00" status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0003</uniqueID>
+    <authority value="auction"/>
+    <underOffer value="yes"/>
+    <price display="yes">220000</price>
+    <auction date="2026-11-14-11:00:00"/>
+    <address display="yes">
+      <lotNumber>5</lotNumber>
+      <street>Sample Road</street>
+      <suburb display="yes">Sampleton</suburb>
+      <state>WA</state>
+      <postcode>0003</postcode>
+    </address>
+    <landCategory name="Residential"/>
+    <headline>Cleared building block in a growing estate</headline>
+    <description>Level block with services at the boundary.</description>
+    <landDetails>
+      <area unit="squareMeter">800</area>
+      <frontage unit="meter">20</frontage>
+      <depth unit="meter">40</depth>
+    </landDetails>
+    <objects>
+      <img id="m" url="https://img.example.com/TEST0003/block.jpg" format="jpg"/>
+    </objects>
+  </land>
+</propertyList>

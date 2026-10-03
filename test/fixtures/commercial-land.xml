@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <commercialLand modTime="2026-09-12-10:00:00" status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0006</uniqueID>
+    <commercialListingType value="sale"/>
+    <commercialCategory name="Development Site"/>
+    <price display="yes">2100000</price>
+    <zone>Industrial 1</zone>
+    <address display="yes">
+      <street>Example Street</street>
+      <suburb display="yes">Testville</suburb>
+      <state>WA</state>
+      <postcode>0006</postcode>
+    </address>
+    <headline>Flat industrial site with sealed access</headline>
+    <description>Fully fenced yard, power connected and a wide road frontage.</description>
+    <landDetails>
+      <area unit="hectare">2.4</area>
+    </landDetails>
+  </commercialLand>
+</propertyList>

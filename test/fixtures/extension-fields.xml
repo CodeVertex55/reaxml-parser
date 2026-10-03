@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <residential status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0001</uniqueID>
+    <headline>Listing with keyed extension fields</headline>
+    <extraFields>
+      <geoLat>-30.1234</geoLat>
+      <geoLong>140.5678</geoLong>
+      <vendorRef>REF-0001</vendorRef>
+      <featureTag>Corner block</featureTag>
+    </extraFields>
+  </residential>
+  <residential status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0002</uniqueID>
+    <headline>Listing with named extension fields</headline>
+    <extraFields>
+      <extraField name="vendorRef" value="REF-0002"/>
+      <extraField name="latitude">-30.2</extraField>
+      <extraField name="longitude">140.6</extraField>
+    </extraFields>
+  </residential>
+</propertyList>

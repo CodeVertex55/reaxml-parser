@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <residential status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0001</uniqueID>
+    <address display="yes">
+      <streetNumber>2/80</streetNumber>
+      <street>Example Street</street>
+      <suburb display="yes">Testville</suburb>
+      <state>WA</state>
+      <postcode>0001</postcode>
+    </address>
+    <headline>Unit with the unit number inside the street number</headline>
+  </residential>
+</propertyList>

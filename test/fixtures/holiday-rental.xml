@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <holidayRental modTime="2026-09-05-11:00:00" status="current">
+    <agentID>XNWDEMO</agentID>
+    <uniqueID>TEST0008</uniqueID>
+    <priceView>From $2,100 per week</priceView>
+    <address display="yes">
+      <streetNumber>22</streetNumber>
+      <street>Placeholder Avenue</street>
+      <suburb display="yes">Mockford</suburb>
+      <state>NSW</state>
+      <postcode>0008</postcode>
+    </address>
+    <holidayCategory name="Beach House"/>
+    <headline>Relaxed beach house with room for the whole family</headline>
+    <description>Short walk to the sand, with a large deck and outdoor shower.</description>
+    <features>
+      <bedrooms>3</bedrooms>
+      <bathrooms>2</bathrooms>
+      <pool>yes</pool>
+      <petFriendly>yes</petFriendly>
+    </features>
+    <objects>
+      <img id="m" url="https://img.example.com/TEST0008/deck.jpg" format="jpg"/>
+    </objects>
+  </holidayRental>
+</propertyList>

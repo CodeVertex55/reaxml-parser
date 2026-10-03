@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <residential status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0001</uniqueID>
+    <headline>Listing with a land area that has a unit but no value</headline>
+    <landDetails>
+      <area unit="squareMeter"></area>
+      <frontage unit="meter">15</frontage>
+    </landDetails>
+  </residential>
+</propertyList>

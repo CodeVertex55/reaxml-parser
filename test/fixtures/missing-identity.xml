@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <residential status="current">
+    <agentID>XNWTEST</agentID>
+    <headline>Listing with no unique identifier</headline>
+  </residential>
+  <residential status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0002</uniqueID>
+    <headline>Listing with a full identity</headline>
+  </residential>
+</propertyList>

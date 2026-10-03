@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList date="2026-10-01-08:00:00">
+  <residential modTime="2026-09-30-14:05:10" status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0001</uniqueID>
+    <authority value="exclusive"/>
+    <underOffer value="no"/>
+    <listingAgent id="1">
+      <name>Alex Sample</name>
+      <telephone type="BH">0491 570 006</telephone>
+      <telephone type="mobile">0491 570 156</telephone>
+      <email>alex.sample@example.com</email>
+    </listingAgent>
+    <listingAgent id="2">
+      <name>Jordan Example</name>
+      <email>jordan.example@example.com</email>
+    </listingAgent>
+    <price display="yes" tax="inclusive">650000</price>
+    <priceView>Offers over $650,000</priceView>
+    <address display="yes">
+      <streetNumber>12</streetNumber>
+      <street>Example Street</street>
+      <suburb display="yes">Testville</suburb>
+      <state>wa</state>
+      <postcode>0001</postcode>
+      <country>AU</country>
+    </address>
+    <category name="House"/>
+    <headline>Family home close to parks and schools</headline>
+    <description>Light filled family home with a generous backyard.&#10;Open plan living flows to a covered deck.&#10;Walk to the Testville village &amp; station.</description>
+    <features>
+      <bedrooms>4</bedrooms>
+      <bathrooms>2</bathrooms>
+      <ensuite>1</ensuite>
+      <garages>2</garages>
+      <carports>1</carports>
+      <airConditioning>yes</airConditioning>
+      <pool>no</pool>
+      <balcony>1</balcony>
+      <otherFeatures>Solar panels and a rainwater tank</otherFeatures>
+    </features>
+    <landDetails>
+      <area unit="squareMeter">650</area>
+      <frontage unit="meter">18</frontage>
+      <depth unit="meter">36</depth>
+    </landDetails>
+    <buildingDetails>
+      <area unit="squareMeter">210</area>
+      <energyRating>6.5</energyRating>
+    </buildingDetails>
+    <inspectionTimes>
+      <inspection>21-Dec-2026 11:00am to 11:30am</inspection>
+    </inspectionTimes>
+    <objects>
+      <img id="m" modTime="2026-09-01-09:00:00" url="https://img.example.com/TEST0001/front.jpg" format="jpg"/>
+      <img id="a" url="https://img.example.com/TEST0001/kitchen.jpg" format="jpg"/>
+      <floorplan id="1" url="https://img.example.com/TEST0001/plan.jpg" format="jpg"/>
+      <document id="1" url="https://img.example.com/TEST0001/brochure.pdf" format="pdf"/>
+    </objects>
+    <videoLink href="https://video.example.com/TEST0001"/>
+    <externalLink href="https://tour.example.com/TEST0001"/>
+  </residential>
+</propertyList>

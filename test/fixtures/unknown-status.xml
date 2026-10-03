@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <residential status="pending">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0001</uniqueID>
+    <headline>Listing with a status outside the known set</headline>
+  </residential>
+</propertyList>

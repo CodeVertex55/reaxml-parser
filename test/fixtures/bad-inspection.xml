@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <residential status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0001</uniqueID>
+    <headline>Listing with one inspection time that cannot be read</headline>
+    <inspectionTimes>
+      <inspection>2026-12-12 10:00 to 10:30</inspection>
+      <inspection>Open home on Saturday morning</inspection>
+    </inspectionTimes>
+  </residential>
+</propertyList>

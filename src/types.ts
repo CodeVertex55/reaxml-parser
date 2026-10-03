@@ -33,7 +33,7 @@ export type ListingKind =
 
 export type ListingStatus = "current" | "sold" | "leased" | "withdrawn" | "offmarket" | "deleted";
 
-type ListingBase = {
+export type ListingBase = {
   kind: ListingKind;
   /** `${agentId}:${uniqueId}`, the stable identity to upsert on. */
   id: string;

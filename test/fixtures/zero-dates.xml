@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList date="0000-00-00-00:00:00">
+  <residential modTime="0000-00-00-00:00:00" status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0001</uniqueID>
+    <auction date="0000-00-00"/>
+    <headline>Listing with zero dates from a careless export</headline>
+    <objects>
+      <img id="m" modTime="0000-00-00-00:00:00" url="https://img.example.com/TEST0001/front.jpg" format="jpg"/>
+    </objects>
+  </residential>
+</propertyList>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList username="feeduser-SENTINEL" password="feedpass-SENTINEL">
+  <residential status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0001</uniqueID>
+    <headline>Listing that is never closed properly
+  </residential>
+</propertyList>

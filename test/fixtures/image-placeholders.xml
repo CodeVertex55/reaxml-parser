@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<propertyList>
+  <residential status="current">
+    <agentID>XNWTEST</agentID>
+    <uniqueID>TEST0001</uniqueID>
+    <headline>Listing with empty media slots</headline>
+    <objects>
+      <img id="m" url="https://img.example.com/TEST0001/front.jpg" format="jpg"/>
+      <img id="a"/>
+      <img id="b" file="TEST0001-b.jpg"/>
+      <floorplan id="1"/>
+    </objects>
+  </residential>
+</propertyList>
