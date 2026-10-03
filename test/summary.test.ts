@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseReaxml, summarise } from "../src/index.js";
-import type { ParseResult } from "../src/index.js";
+import type { Listing, ParseResult } from "../src/index.js";
 import { fixture } from "./helpers.js";
 
 describe("summarise", () => {
@@ -42,6 +42,26 @@ describe("summarise", () => {
       "withdrawn",
       "offmarket",
     ]);
+  });
+
+  it("accounts for every listing in byKind and byStatus", () => {
+    const summary = summarise(parseReaxml(fixture("mixed")));
+    const sum = (counts: Record<string, number | undefined>): number =>
+      Object.values(counts).reduce<number>((total, n) => total + (n ?? 0), 0);
+    expect(sum(summary.byKind)).toBe(summary.listings);
+    expect(sum(summary.byStatus)).toBe(summary.listings);
+  });
+
+  it("keeps a kind or status it does not know, after the known ones", () => {
+    const result = parseReaxml(fixture("mixed"));
+    const first = result.listings[0];
+    if (first === undefined) throw new Error("fixture has no listings");
+    const future = { ...first, kind: "futureKind", status: "futureStatus" } as unknown as Listing;
+    const summary = summarise({ ...result, listings: [future, ...result.listings] });
+    expect(summary.listings).toBe(13);
+    expect(Object.keys(summary.byKind).at(-1)).toBe("futureKind");
+    expect(Object.keys(summary.byStatus).at(-1)).toBe("futureStatus");
+    expect(Object.keys(summary.byKind)[0]).toBe("residential");
   });
 
   it("counts diagnostics by severity and by code, with codes in alphabetical order", () => {

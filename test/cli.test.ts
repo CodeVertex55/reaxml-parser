@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { run, type Io } from "../src/cli.js";
 import { VERSION } from "../src/index.js";
-import { fixture } from "./helpers.js";
+import { feed, fixture } from "./helpers.js";
 
 type Captured = { code: number; stdout: string; stderr: string };
 
@@ -279,6 +279,62 @@ describe("run: --time-zone", () => {
       expect(out.stdout).toBe("");
       expect(out.stderr).toBe("Invalid time zone: Bad/Zone\n");
     }
+  });
+});
+
+describe("run: terminal safety", () => {
+  const hostile = feed(
+    '<residential status="bogus"><agentID>A</agentID><uniqueID>\u001b[31mX\u0007</uniqueID></residential>',
+  );
+
+  function hasControlCharacter(text: string): boolean {
+    for (const char of text) {
+      const code = char.codePointAt(0) ?? 0;
+      if ((code < 0x20 && code !== 0x0a) || code === 0x7f) return true;
+    }
+    return false;
+  }
+
+  it("replaces control characters in listing ids in human output", () => {
+    const out = cli(["validate", "feed.xml"], { "feed.xml": hostile });
+    expect(out.stdout).toContain("unknown-status");
+    expect(out.stdout).toContain("Listing A:?[31mX?:");
+    expect(hasControlCharacter(out.stdout + out.stderr)).toBe(false);
+  });
+
+  it("leaves --json to JSON escaping", () => {
+    const out = cli(["validate", "feed.xml", "--json"], { "feed.xml": hostile });
+    expect(hasControlCharacter(out.stdout)).toBe(false);
+    expect(JSON.parse(out.stdout)).toHaveProperty("warnings");
+  });
+});
+
+describe("run: unexpected failures", () => {
+  it("checks the time zone before reading the file", () => {
+    let reads = 0;
+    const errors: string[] = [];
+    const code = run(["validate", "missing.xml", "--time-zone", "Bad/Zone"], {
+      stdout: () => undefined,
+      stderr: (s) => errors.push(s),
+      readFile: () => {
+        reads += 1;
+        throw new Error("unreachable");
+      },
+    });
+    expect(code).toBe(2);
+    expect(reads).toBe(0);
+    expect(errors).toEqual(["Invalid time zone: Bad/Zone\n"]);
+  });
+
+  it("reports any other parser failure as a generic error without a stack trace", () => {
+    const errors: string[] = [];
+    const code = run(["validate", "feed.xml"], {
+      stdout: () => undefined,
+      stderr: (s) => errors.push(s),
+      readFile: () => null as unknown as string,
+    });
+    expect(code).toBe(2);
+    expect(errors).toEqual(["Unexpected error\n"]);
   });
 });
 

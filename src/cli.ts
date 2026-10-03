@@ -95,8 +95,18 @@ function countBlock(title: string, counts: Readonly<Record<string, number | unde
   return [`${title}:`, ...entries.map(([key, count]) => `  ${key}: ${count}`)];
 }
 
+/** Replaces control characters with `?`, so text from the feed cannot drive the terminal. */
+function plain(text: string): string {
+  let out = "";
+  for (const char of text) {
+    const code = char.codePointAt(0) ?? 0;
+    out += code < 0x20 || code === 0x7f ? "?" : char;
+  }
+  return out;
+}
+
 function diagnosticLine(d: Diagnostic): string {
-  return `  ${d.severity} ${d.code} ${d.path} ${d.message}`;
+  return `  ${d.severity} ${d.code} ${plain(d.path)} ${plain(d.message)}`;
 }
 
 /** Feed-level diagnostics first, then one group per listing in first-seen order. */
@@ -118,7 +128,7 @@ function diagnosticGroups(diagnostics: readonly Diagnostic[]): string[] {
     lines.push("Feed:", ...feedLevel.map(diagnosticLine), "");
   }
   for (const [id, group] of byListing) {
-    lines.push(`Listing ${id}:`, ...group.map(diagnosticLine), "");
+    lines.push(`Listing ${plain(id)}:`, ...group.map(diagnosticLine), "");
   }
   return lines;
 }
@@ -174,6 +184,15 @@ export function run(argv: string[], io: Io): number {
       break;
   }
 
+  if (parsed.timeZone !== undefined) {
+    try {
+      new Intl.DateTimeFormat("en-US", { timeZone: parsed.timeZone });
+    } catch {
+      io.stderr(`Invalid time zone: ${parsed.timeZone}\n`);
+      return 2;
+    }
+  }
+
   let xml: string;
   try {
     xml = io.readFile(parsed.file);
@@ -185,12 +204,10 @@ export function run(argv: string[], io: Io): number {
   let result: ParseResult;
   try {
     result = parseReaxml(xml, parsed.timeZone === undefined ? {} : { timeZone: parsed.timeZone });
-  } catch (error) {
-    if (error instanceof RangeError) {
-      io.stderr(`Invalid time zone: ${parsed.timeZone ?? ""}\n`);
-      return 2;
-    }
-    throw error;
+  } catch {
+    // The error text is withheld, because it could carry text from the feed.
+    io.stderr("Unexpected error\n");
+    return 2;
   }
 
   const summary = summarise(result);

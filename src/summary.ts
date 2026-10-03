@@ -16,29 +16,34 @@ export type Summary = {
   };
 };
 
-/** Kinds in the order the `ListingKind` type declares them. */
-const KIND_ORDER: readonly ListingKind[] = [
-  "residential",
-  "rental",
-  "land",
-  "rural",
-  "commercial",
-  "commercialLand",
-  "business",
-  "holidayRental",
-];
+/** Every kind, in the order the `ListingKind` type declares them. A missing kind fails typecheck. */
+const KIND_FLAGS = {
+  residential: true,
+  rental: true,
+  land: true,
+  rural: true,
+  commercial: true,
+  commercialLand: true,
+  business: true,
+  holidayRental: true,
+} as const satisfies Record<ListingKind, true>;
+const KIND_ORDER = Object.keys(KIND_FLAGS) as ListingKind[];
 
-/** Statuses in the order the `ListingStatus` type declares them. */
-const STATUS_ORDER: readonly ListingStatus[] = [
-  "current",
-  "sold",
-  "leased",
-  "withdrawn",
-  "offmarket",
-  "deleted",
-];
+/** Every status, in the order the `ListingStatus` type declares them. A missing status fails typecheck. */
+const STATUS_FLAGS = {
+  current: true,
+  sold: true,
+  leased: true,
+  withdrawn: true,
+  offmarket: true,
+  deleted: true,
+} as const satisfies Record<ListingStatus, true>;
+const STATUS_ORDER = Object.keys(STATUS_FLAGS) as ListingStatus[];
 
-/** Copies the entries of `counts` into a record, in the key order given by `order`. */
+/**
+ * Copies the entries of `counts` into a record, in the key order given by `order`. Any counted key
+ * missing from `order` is appended after the ordered ones, so nothing is ever dropped.
+ */
 function inOrder<K extends string>(
   order: readonly K[],
   counts: ReadonlyMap<K, number>,
@@ -47,6 +52,9 @@ function inOrder<K extends string>(
   for (const key of order) {
     const count = counts.get(key);
     if (count !== undefined) out[key] = count;
+  }
+  for (const [key, count] of counts) {
+    if (!(key in out)) out[key] = count;
   }
   return out;
 }
