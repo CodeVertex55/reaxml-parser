@@ -34,7 +34,8 @@ const MAX_UNIT_DETAIL = 40;
 /**
  * Reads a measure element such as `area`, `frontage` or `depth`. A missing node gives null with
  * no diagnostic. Empty text gives `empty-measure`, non-numeric text gives `unparseable-number`
- * and an unrecognised unit gives `unknown-unit`; each returns null. A stated value of 0 is kept.
+ * and an unrecognised unit gives `unknown-unit`; each returns null. A negative value is not a
+ * meaningful measure and is treated like non-numeric text. A stated value of 0 is kept.
  * A missing unit defaults to meters for `frontage` and `depth` and to square meters otherwise.
  */
 export function parseMeasure(node: XmlNode | undefined, c: Collector): Measure | null {
@@ -47,7 +48,7 @@ export function parseMeasure(node: XmlNode | undefined, c: Collector): Measure |
   }
 
   const value = parseNumber(raw);
-  if (value === null) {
+  if (value === null || value < 0) {
     c.add("unparseable-number", node.path, node.name);
     return null;
   }

@@ -94,16 +94,18 @@ function offsetAt(formatter: Intl.DateTimeFormat, instant: number): number {
  * The UTC instant for a wall clock reading in a zone. Offsets are sampled a day either side of
  * the reading, which brackets any single transition. A candidate instant is valid when the zone
  * really shows that offset then. A reading that happens twice (clocks going back) has two valid
- * candidates and a reading that never happens (clocks going forward) has none; in both cases
- * the earlier instant is returned.
+ * candidates and the earlier one is returned. A reading that never happens (clocks going
+ * forward) has none, and is shifted forward by the length of the gap: the offset from before
+ * the gap gives the later of the two candidates. This matches JS Date, Temporal "compatible"
+ * and Java.
  */
 function zonedToUtc(formatter: Intl.DateTimeFormat, f: Fields): number {
   const wall = utcMs(f);
   const offsets = new Set([offsetAt(formatter, wall - DAY_MS), offsetAt(formatter, wall + DAY_MS)]);
   const candidates = [...offsets].map((offset) => ({ offset, instant: wall - offset }));
   const valid = candidates.filter((c) => offsetAt(formatter, c.instant) === c.offset);
-  const pool = valid.length > 0 ? valid : candidates;
-  return Math.min(...pool.map((c) => c.instant));
+  if (valid.length > 0) return Math.min(...valid.map((c) => c.instant));
+  return Math.max(...candidates.map((c) => c.instant));
 }
 
 function toUtcString(instant: number): string {
@@ -122,8 +124,8 @@ function invalid(raw: string, path: string, c: Collector): null {
 /**
  * Normalises a REAXML date. Date-times become local `YYYY-MM-DDThh:mm:ss` and date-only values
  * become `YYYY-MM-DD`. With `opts.timeZone`, date-times become UTC `YYYY-MM-DDThh:mm:ssZ`
- * and date-only values stay as they are. A wall time that does not exist in the zone, or that
- * occurs twice, resolves to the earlier UTC instant.
+ * and date-only values stay as they are. A wall time that occurs twice resolves to the earlier UTC
+ * instant. A wall time that does not exist in the zone is shifted forward by the gap.
  *
  * Null, empty and blank input give null with no diagnostic. Unparseable and zero dates give
  * null and an `invalid-date` diagnostic.

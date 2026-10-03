@@ -94,14 +94,17 @@ describe("parseMeasure problems", () => {
     expect(diagnostics.map((d) => d.code)).toEqual(["empty-measure"]);
   });
 
-  it.each([["<area unit='sqm'>abc</area>"], ["<area>1.2.3</area>"], ["<frontage>wide</frontage>"]])(
-    "%s gives unparseable-number",
-    (xml) => {
-      const { result, diagnostics } = run(xml);
-      expect(result).toBeNull();
-      expect(diagnostics.map((d) => d.code)).toEqual(["unparseable-number"]);
-    },
-  );
+  it.each([
+    ["<area unit='sqm'>abc</area>"],
+    ["<area>1.2.3</area>"],
+    ["<frontage>wide</frontage>"],
+    ["<area unit='sqm'>-5</area>"],
+    ["<frontage>-1.5</frontage>"],
+  ])("%s gives unparseable-number", (xml) => {
+    const { result, diagnostics } = run(xml);
+    expect(result).toBeNull();
+    expect(diagnostics.map((d) => d.code)).toEqual(["unparseable-number"]);
+  });
 
   it("does not put the raw text in the unparseable-number detail", () => {
     const { diagnostics } = run("<area unit='sqm'>HIDDEN 123</area>");

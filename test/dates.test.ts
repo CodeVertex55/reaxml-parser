@@ -61,6 +61,8 @@ describe("parseDate invalid input", () => {
     ["2026-01-14-12"],
     ["20260114-1230"],
     ["2026-01-14T12:30:45Z"],
+    ["2026-01-14xyz"],
+    ["2026-01-14-12:30:00 extra"],
   ])("rejects %j with an invalid-date diagnostic", (input) => {
     const { result, diagnostics } = run(input);
     expect(result).toBeNull();
@@ -116,10 +118,23 @@ describe("parseDate with a time zone", () => {
     expect(run(null, "Australia/Sydney")).toEqual({ result: null, diagnostics: [] });
   });
 
-  it("returns the earlier instant for a wall time skipped by spring forward", () => {
+  it("shifts a wall time skipped by spring forward ahead by the gap", () => {
     // Sydney clocks go from 02:00 to 03:00 on Sunday 4 October 2026, so 02:30 never happens.
-    // The two candidate instants are 15:30Z (at +11) and 16:30Z (at +10); the earlier wins.
-    expect(run("2026-10-04T02:30:00", "Australia/Sydney").result).toBe("2026-10-03T15:30:00Z");
+    // It is read with the offset from before the gap (+10), which equals 03:30 at +11.
+    expect(run("2026-10-04T02:30:00", "Australia/Sydney").result).toBe("2026-10-03T16:30:00Z");
+  });
+
+  it("shifts a skipped wall time in a half-hour zone by the gap", () => {
+    // Adelaide goes from 02:00 (+9:30) to 03:00 (+10:30) on the same morning.
+    expect(run("2026-10-04T02:30:00", "Australia/Adelaide").result).toBe("2026-10-03T17:00:00Z");
+  });
+
+  it.each([
+    ["Pacific/Auckland", "2026-01-14-12:30:00", "2026-01-13T23:30:00Z"],
+    ["Australia/Adelaide", "2026-01-14-12:30:00", "2026-01-14T02:00:00Z"],
+    ["Australia/Adelaide", "2026-07-14-12:30:00", "2026-07-14T03:00:00Z"],
+  ])("%s: %j becomes %j", (zone, input, expected) => {
+    expect(run(input, zone).result).toBe(expected);
   });
 
   it("returns the earlier instant for an ambiguous wall time on fall back", () => {
