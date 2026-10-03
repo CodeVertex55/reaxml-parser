@@ -54,7 +54,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "smoke": "node scripts/smoke.mjs && node scripts/smoke.cjs && node scripts/smoke-cli.mjs"
   },
   "dependencies": {
     "fast-xml-parser": "^5.11.2"
