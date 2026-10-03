@@ -338,7 +338,7 @@ every hour:
 
 - There is no DTD or schema validation. The parser reads what it recognises and reports what it does not.
 - It parses the whole document in memory. A test feed of 3,000 listings, about 5 MB, parses in under a second on a development machine, and the test allows up to 10 seconds. Feeds are usually far smaller. There is no streaming mode yet.
-- Memory use is roughly eight times the feed size for typical feeds, and far higher for a document that is mostly one very large text node. An out-of-memory failure cannot be caught, so cap the input size before parsing. 50 MB is a reasonable ceiling for one feed file.
+- Memory use is roughly ten to twenty times the feed size for typical feeds, and far higher for a document that is mostly one very large text node. An out-of-memory failure cannot be caught, so cap the input size before parsing. 50 MB is a reasonable ceiling for one feed file.
 - The listing `id` joins the agent ID and the unique ID with a colon. If either one contains a colon, two different listings can end up with the same `id`. Use `agentId` and `uniqueId` together as your key if that could happen.
 - The XML library prefixes element names that match members of JavaScript objects, such as `toString`, with `__`.
 - The whole document is reported as `xml-malformed`, with no listings, when elements are nested more than 100 levels below the root element, when an element or an attribute is named `__proto__`, `constructor` or `prototype`, or when the DOCTYPE declares an external entity.
