@@ -1,1 +1,24 @@
 export const VERSION = "1.0.0";
+
+export { DIAGNOSTIC_CODES, ReaxmlError } from "./diagnostics.js";
+export type {
+  Address,
+  Agent,
+  BusinessDetails,
+  CommercialDetails,
+  Diagnostic,
+  DiagnosticCode,
+  Features,
+  FeedMeta,
+  Inspection,
+  Listing,
+  ListingKind,
+  ListingStatus,
+  Measure,
+  MediaItem,
+  ParseOptions,
+  ParseResult,
+  Price,
+  Rent,
+  Severity,
+} from "./types.js";
