@@ -23,6 +23,11 @@ const PERIODS: ReadonlyMap<string, Rent["period"]> = new Map<string, Rent["perio
   ["annually", "year"],
 ]);
 
+/** The tax basis from a money element's `tax` attribute. Anything unrecognised is "unknown". */
+export function taxOf(node: XmlNode): Price["tax"] {
+  return TAX.get(attr(node, "tax")?.toLowerCase() ?? "") ?? "unknown";
+}
+
 /** The value of a node's `display` attribute, trimmed and lower-cased. Null when absent. */
 function displayMode(node: XmlNode): string | null {
   return attr(node, "display")?.toLowerCase() ?? null;
@@ -34,7 +39,7 @@ function displayMode(node: XmlNode): string | null {
  * any text, a `hidden-price-withheld` diagnostic names the element only. Otherwise the amount
  * is parsed, and `hidden` still reports the display flag.
  */
-function readMoney(
+export function readMoney(
   node: XmlNode,
   c: Collector,
   o: MoneyOptions,
@@ -86,8 +91,7 @@ export function parsePrice(listing: XmlNode, c: Collector, o: MoneyOptions): Pri
 
   const { amount, hidden } = readMoney(node, c, o);
   const range = displayMode(node) === "range" ? parseRange(attr(node, "range")) : null;
-  const tax = TAX.get(attr(node, "tax")?.toLowerCase() ?? "") ?? "unknown";
-  return { amount, hidden, view, range, tax };
+  return { amount, hidden, view, range, tax: taxOf(node) };
 }
 
 function periodOf(node: XmlNode): Rent["period"] {
