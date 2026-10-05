@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- The repository moved to github.com/CodeVertex55 after a GitHub account rename. The package metadata and the install command point at the new address. The old address still redirects.
+
 ## 1.0.0 (2026-10-04)
 
 First release.

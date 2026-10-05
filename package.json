@@ -6,11 +6,11 @@
   "author": "Talha Muneer",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/talha55/reaxml-parser.git"
+    "url": "git+https://github.com/CodeVertex55/reaxml-parser.git"
   },
-  "homepage": "https://github.com/talha55/reaxml-parser#readme",
+  "homepage": "https://github.com/CodeVertex55/reaxml-parser#readme",
   "bugs": {
-    "url": "https://github.com/talha55/reaxml-parser/issues"
+    "url": "https://github.com/CodeVertex55/reaxml-parser/issues"
   },
   "keywords": [
     "reaxml",
