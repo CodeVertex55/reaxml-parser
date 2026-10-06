@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Parse REAXML real-estate feeds into typed, normalised listings with structured diagnostics",
   "license": "MIT",
-  "author": "Talha Muneer",
+  "author": "Code Vertex",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CodeVertex55/reaxml-parser.git"
